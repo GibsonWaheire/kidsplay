@@ -33,7 +33,7 @@ export function Hero() {
               {/* Enhanced Description */}
               <p className="text-xl text-gray-600 max-w-lg lg:mx-0 mx-auto leading-relaxed">
                 Discover amazing educational games, creative software, and interactive content. 
-                Supporting both KES and USD for global accessibility.
+        
               </p>
             </div>
 

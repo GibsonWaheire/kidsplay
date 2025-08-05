@@ -1,13 +1,15 @@
 import React from "react";
 import Hero from "../components/sections/Hero";
 import ExploreCategories from "../components/sections/ExploreCategories";
+import FeaturedProducts from "../components/sections/FeaturedProducts";
 
 const Home = () => {
   return (
     <div>
       <Hero />
       <ExploreCategories />
-      {/* Add FeaturedProducts, ExploreCategories, Testimonials, etc. below here when ready */}
+      <FeaturedProducts />
+      {/* Add Testimonials, Newsletter, etc. below here when ready */}
     </div>
   );
 };
