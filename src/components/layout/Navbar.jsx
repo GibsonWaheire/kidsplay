@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
+import { useNotifications } from "../../context/NotificationContext";
 import CartSidebar from "../ui/CartSidebar";
+import NotificationDropdown from "../ui/NotificationDropdown";
 
 const Navbar = ({ onMenuClick }) => {
   const [scrolled, setScrolled] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [notificationOpen, setNotificationOpen] = useState(false);
   const { totalItems } = useCart();
+  const { unreadCount, addCartReminder } = useNotifications();
 
   // Handle scroll effect
   useEffect(() => {
@@ -18,6 +22,21 @@ const Navbar = ({ onMenuClick }) => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Add cart reminder notification when items are in cart
+  useEffect(() => {
+    if (totalItems > 0) {
+      // Only add cart reminder if there isn't already one
+      const existingCartReminder = localStorage.getItem('cartReminderAdded');
+      if (!existingCartReminder) {
+        addCartReminder(totalItems);
+        localStorage.setItem('cartReminderAdded', 'true');
+      }
+    } else {
+      // Remove cart reminder when cart is empty
+      localStorage.removeItem('cartReminderAdded');
+    }
+  }, [totalItems, addCartReminder]);
 
   return (
     <>
@@ -51,12 +70,25 @@ const Navbar = ({ onMenuClick }) => {
           {/* Right side - Actions */}
           <div className="flex items-center gap-4">
             {/* Notifications */}
-            <button className="relative p-2 rounded-xl hover:bg-gray-100 transition-all duration-300 group cursor-pointer">
-              <span className="text-2xl group-hover:scale-110 transition-transform duration-300">🔔</span>
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                2
-              </span>
-            </button>
+            <div className="relative">
+              <button 
+                onClick={() => setNotificationOpen(!notificationOpen)}
+                className="relative p-2 rounded-xl hover:bg-gray-100 transition-all duration-300 group cursor-pointer"
+              >
+                <span className="text-2xl group-hover:scale-110 transition-transform duration-300">🔔</span>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </button>
+              
+              {/* Notification Dropdown */}
+              <NotificationDropdown 
+                isOpen={notificationOpen} 
+                onClose={() => setNotificationOpen(false)} 
+              />
+            </div>
 
             {/* Cart */}
             <button 
@@ -67,7 +99,7 @@ const Navbar = ({ onMenuClick }) => {
               <span className="text-2xl group-hover:scale-110 transition-transform duration-300">🛒</span>
               {totalItems > 0 && (
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                  {totalItems}
+                  {totalItems > 99 ? '99+' : totalItems}
                 </span>
               )}
             </button>

@@ -5,7 +5,7 @@ const CartContext = createContext();
 // Cart reducer
 const cartReducer = (state, action) => {
   switch (action.type) {
-    case 'ADD_TO_CART':
+    case 'ADD_TO_CART': {
       const existingItem = state.items.find(item => item.id === action.payload.id);
       if (existingItem) {
         return {
@@ -22,6 +22,7 @@ const cartReducer = (state, action) => {
           items: [...state.items, { ...action.payload, quantity: 1 }],
         };
       }
+    }
     
     case 'REMOVE_FROM_CART':
       return {
@@ -45,7 +46,7 @@ const cartReducer = (state, action) => {
         items: [],
       };
     
-    case 'PROCESS_ORDER':
+    case 'PROCESS_ORDER': {
       const newOrder = {
         id: Date.now().toString(),
         items: [...state.items],
@@ -59,6 +60,7 @@ const cartReducer = (state, action) => {
         items: [],
         orders: [...(state.orders || []), newOrder],
       };
+    }
     
     default:
       return state;
@@ -66,7 +68,7 @@ const cartReducer = (state, action) => {
 };
 
 // Cart provider component
-export const CartProvider = ({ children }) => {
+const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, {
     items: [],
     orders: [],
@@ -152,10 +154,12 @@ export const CartProvider = ({ children }) => {
 };
 
 // Custom hook to use cart context
-export const useCart = () => {
+const useCart = () => {
   const context = useContext(CartContext);
   if (!context) {
     throw new Error('useCart must be used within a CartProvider');
   }
   return context;
-}; 
+};
+
+export { CartProvider, useCart }; 

@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useCart } from '../../context/CartContext';
+import { useNotifications } from '../../context/NotificationContext';
 
 const CartSidebar = ({ isOpen, onClose }) => {
   const { items, totalPrice, removeFromCart, updateQuantity, clearCart, processOrder } = useCart();
+  const { addOrderConfirmation, addDownloadReady } = useNotifications();
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -45,6 +47,17 @@ const CartSidebar = ({ isOpen, onClose }) => {
       
       // Process the order
       processOrder();
+      
+      // Add notifications
+      const orderNumber = `ORD-${Date.now().toString().slice(-6)}`;
+      addOrderConfirmation(orderNumber);
+      
+      // Add download ready notifications for free items
+      items.forEach(item => {
+        if (item.price === 0) {
+          addDownloadReady(item.title);
+        }
+      });
       
       // Show success message
       setShowSuccess(true);
