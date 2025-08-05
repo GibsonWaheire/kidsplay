@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
+import { useCart } from "../../context/CartContext";
 
 // Enhanced hamburger with better animations
 const Hamburger = ({ open, onClick }) => (
@@ -25,6 +26,7 @@ const navLinks = [
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { totalItems } = useCart();
 
   // Handle scroll effect
   useEffect(() => {
@@ -85,9 +87,11 @@ const Navbar = () => {
           >
             <span className="text-2xl group-hover:scale-110 transition-transform duration-300">🛒</span>
             {/* Cart badge */}
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-              3
-            </span>
+            {totalItems > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                {totalItems}
+              </span>
+            )}
           </Link>
           
           <Link 
@@ -133,7 +137,7 @@ const Navbar = () => {
               className="flex-1 flex items-center justify-center gap-2 bg-blue-50 text-blue-700 px-4 py-3 rounded-xl font-medium hover:bg-blue-100 transition-colors duration-300"
             >
               <span className="text-xl">🛒</span>
-              Cart (3)
+              Cart ({totalItems})
             </Link>
             <Link 
               to="/login" 

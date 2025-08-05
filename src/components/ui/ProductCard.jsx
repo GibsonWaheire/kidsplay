@@ -1,7 +1,27 @@
 import React from "react";
+import { useCart } from "../../context/CartContext";
 
-const ProductCard = ({ product }) => (
-  <div className="bg-white rounded-xl shadow-sm hover:shadow-xl border border-gray-100 p-5 flex flex-col h-full relative group transition-all duration-300 hover:-translate-y-1">
+const ProductCard = ({ product, onDownload, onAddToCart }) => {
+  const { addToCart } = useCart();
+
+  const handleAddToCart = () => {
+    addToCart(product);
+    if (onAddToCart) {
+      onAddToCart(product);
+    }
+  };
+
+  const handleDownload = () => {
+    if (onDownload) {
+      onDownload(product);
+    } else {
+      // Default download behavior
+      alert(`Download started for ${product.title}!`);
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm hover:shadow-xl border border-gray-100 p-5 flex flex-col h-full relative group transition-all duration-300 hover:-translate-y-1">
     {/* Badge */}
     {product.badge && (
       <span className={`absolute top-4 left-4 text-xs font-bold px-3 py-1 rounded-full z-10 ${
@@ -71,16 +91,20 @@ const ProductCard = ({ product }) => (
             </div>
           )}
         </div>
-        <button className={`text-sm rounded-lg px-4 py-2 font-semibold transition-all duration-300 ${
-          product.price === 0 
-            ? "bg-green-600 text-white hover:bg-green-700 hover:scale-105" 
-            : "bg-blue-600 text-white hover:bg-blue-700 hover:scale-105"
-        }`}>
+        <button 
+          onClick={product.price === 0 ? handleDownload : handleAddToCart}
+          className={`text-sm rounded-lg px-4 py-2 font-semibold transition-all duration-300 ${
+            product.price === 0 
+              ? "bg-green-600 text-white hover:bg-green-700 hover:scale-105" 
+              : "bg-blue-600 text-white hover:bg-blue-700 hover:scale-105"
+          }`}
+        >
           {product.price === 0 ? "Download" : "Add to Cart"}
         </button>
       </div>
     </div>
   </div>
-);
+  );
+};
 
 export default ProductCard; 
