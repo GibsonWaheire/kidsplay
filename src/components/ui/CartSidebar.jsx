@@ -1,8 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useCart } from '../../context/CartContext';
 
 const CartSidebar = ({ isOpen, onClose }) => {
-  const { items, totalPrice, removeFromCart, updateQuantity, clearCart } = useCart();
+  const { items, totalPrice, removeFromCart, updateQuantity, clearCart, processOrder } = useCart();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   // Handle escape key
   useEffect(() => {
@@ -14,12 +16,10 @@ const CartSidebar = ({ isOpen, onClose }) => {
 
     if (isOpen) {
       document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
     }
 
     return () => {
       document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
     };
   }, [isOpen, onClose]);
 
@@ -31,22 +31,43 @@ const CartSidebar = ({ isOpen, onClose }) => {
     }
   };
 
-  const handleCheckout = () => {
-    // In a real app, this would navigate to checkout or open checkout modal
+  const handleCheckout = async () => {
     if (items.length === 0) {
       alert('Your cart is empty!');
       return;
     }
-    alert('Proceeding to checkout...');
-    onClose();
+
+    setIsProcessing(true);
+    
+    try {
+      // Simulate payment processing
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Process the order
+      processOrder();
+      
+      // Show success message
+      setShowSuccess(true);
+      
+      // Close sidebar after a delay
+      setTimeout(() => {
+        setShowSuccess(false);
+        onClose();
+      }, 3000);
+      
+    } catch (error) {
+      alert('Payment failed. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
     <>
-      {/* Backdrop */}
+      {/* Light overlay with blur effect */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity duration-300"
+          className="fixed inset-0 bg-black bg-opacity-10 backdrop-blur-sm z-40 transition-opacity duration-300"
           onClick={onClose}
         />
       )}
@@ -66,6 +87,19 @@ const CartSidebar = ({ isOpen, onClose }) => {
           </button>
         </div>
 
+        {/* Success Message */}
+        {showSuccess && (
+          <div className="bg-green-50 border border-green-200 p-4 mx-6 mt-4 rounded-lg">
+            <div className="flex items-center gap-2">
+              <span className="text-green-600 text-xl">✅</span>
+              <div>
+                <h3 className="font-semibold text-green-800">Order Successful!</h3>
+                <p className="text-green-600 text-sm">Your order has been processed and added to your orders.</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Cart Items */}
         <div className="flex-1 overflow-y-auto p-6">
           {items.length === 0 ? (
@@ -77,7 +111,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
           ) : (
             <div className="space-y-4">
               {items.map((item) => (
-                <div key={item.id} className="flex gap-4 p-4 bg-gray-50 rounded-lg">
+                <div key={item.id} className="flex gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
                   {/* Product Image */}
                   <img
                     src={item.image}
@@ -148,14 +182,29 @@ const CartSidebar = ({ isOpen, onClose }) => {
             <div className="space-y-3">
               <button
                 onClick={handleCheckout}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-105 shadow-lg"
+                disabled={isProcessing}
+                className={`w-full py-3 px-6 rounded-xl font-semibold transition-all duration-300 shadow-lg ${
+                  isProcessing
+                    ? 'bg-gray-400 text-white cursor-not-allowed'
+                    : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 hover:scale-105'
+                }`}
               >
-                Proceed to Checkout
+                {isProcessing ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Processing...
+                  </div>
+                ) : (
+                  'Proceed to Checkout'
+                )}
               </button>
               
               <button
                 onClick={clearCart}
-                className="w-full bg-gray-200 text-gray-700 py-2 px-6 rounded-xl font-medium hover:bg-gray-300 transition-colors duration-200"
+                disabled={isProcessing}
+                className={`w-full bg-gray-200 text-gray-700 py-2 px-6 rounded-xl font-medium transition-colors duration-200 ${
+                  isProcessing ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-300'
+                }`}
               >
                 Clear Cart
               </button>

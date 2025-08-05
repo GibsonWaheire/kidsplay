@@ -45,6 +45,21 @@ const cartReducer = (state, action) => {
         items: [],
       };
     
+    case 'PROCESS_ORDER':
+      const newOrder = {
+        id: Date.now().toString(),
+        items: [...state.items],
+        totalPrice: state.items.reduce((total, item) => total + (item.price * item.quantity), 0),
+        status: 'processing',
+        createdAt: new Date().toISOString(),
+        orderNumber: `ORD-${Date.now().toString().slice(-6)}`,
+      };
+      return {
+        ...state,
+        items: [],
+        orders: [...(state.orders || []), newOrder],
+      };
+    
     default:
       return state;
   }
@@ -54,29 +69,38 @@ const cartReducer = (state, action) => {
 export const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, {
     items: [],
+    orders: [],
   });
 
-  // Load cart from localStorage on mount
+  // Load cart and orders from localStorage on mount
   useEffect(() => {
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
+    const savedData = localStorage.getItem('cartData');
+    if (savedData) {
       try {
-        const parsedCart = JSON.parse(savedCart);
-        if (parsedCart.items && Array.isArray(parsedCart.items)) {
-          parsedCart.items.forEach(item => {
+        const parsedData = JSON.parse(savedData);
+        if (parsedData.items && Array.isArray(parsedData.items)) {
+          parsedData.items.forEach(item => {
             dispatch({ type: 'ADD_TO_CART', payload: item });
           });
         }
+        if (parsedData.orders && Array.isArray(parsedData.orders)) {
+          parsedData.orders.forEach(order => {
+            dispatch({ type: 'PROCESS_ORDER', payload: order });
+          });
+        }
       } catch (error) {
-        console.error('Error loading cart from localStorage:', error);
-        localStorage.removeItem('cart');
+        console.error('Error loading cart data from localStorage:', error);
+        localStorage.removeItem('cartData');
       }
     }
   }, []);
 
-  // Save cart to localStorage whenever it changes
+  // Save cart and orders to localStorage whenever they change
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(state));
+    localStorage.setItem('cartData', JSON.stringify({
+      items: state.items,
+      orders: state.orders || [],
+    }));
   }, [state]);
 
   // Calculate total items in cart
@@ -101,14 +125,23 @@ export const CartProvider = ({ children }) => {
     dispatch({ type: 'CLEAR_CART' });
   };
 
+  const processOrder = () => {
+    if (state.items.length === 0) {
+      throw new Error('Cart is empty');
+    }
+    dispatch({ type: 'PROCESS_ORDER' });
+  };
+
   const value = {
     items: state.items,
+    orders: state.orders || [],
     totalItems,
     totalPrice,
     addToCart,
     removeFromCart,
     updateQuantity,
     clearCart,
+    processOrder,
   };
 
   return (
