@@ -26,18 +26,19 @@ const Navbar = ({ onMenuClick }) => {
           ? 'bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200/50' 
           : 'bg-white/80 backdrop-blur-sm shadow-sm'
       }`}>
-        <div className="flex items-center justify-between px-6 py-4">
-          {/* Left side - Menu button and brand */}
-          <div className="flex items-center gap-4">
-            {/* Mobile menu button */}
+        <div className="flex items-center justify-between px-6 py-4 relative">
+          {/* Left side - Menu button */}
+          <div className="flex items-center">
             <button
               onClick={onMenuClick}
               className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
             >
               <span className="text-2xl">☰</span>
             </button>
-            
-            {/* Brand/Logo */}
+          </div>
+
+          {/* Center - Brand/Logo */}
+          <div className="absolute left-1/2 transform -translate-x-1/2">
             <Link 
               to="/" 
               className="font-bold text-xl text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-300 flex items-center gap-2"
