@@ -93,7 +93,7 @@ const ProductCard = ({ product, onDownload, onAddToCart }) => {
         </div>
         <button 
           onClick={product.price === 0 ? handleDownload : handleAddToCart}
-          className={`text-sm rounded-lg px-4 py-2 font-semibold transition-all duration-300 ${
+          className={`text-sm rounded-lg px-4 py-2 font-semibold transition-all duration-300 cursor-pointer ${
             product.price === 0 
               ? "bg-green-600 text-white hover:bg-green-700 hover:scale-105" 
               : "bg-blue-600 text-white hover:bg-blue-700 hover:scale-105"

@@ -60,10 +60,17 @@ export const CartProvider = ({ children }) => {
   useEffect(() => {
     const savedCart = localStorage.getItem('cart');
     if (savedCart) {
-      const parsedCart = JSON.parse(savedCart);
-      parsedCart.items.forEach(item => {
-        dispatch({ type: 'ADD_TO_CART', payload: item });
-      });
+      try {
+        const parsedCart = JSON.parse(savedCart);
+        if (parsedCart.items && Array.isArray(parsedCart.items)) {
+          parsedCart.items.forEach(item => {
+            dispatch({ type: 'ADD_TO_CART', payload: item });
+          });
+        }
+      } catch (error) {
+        console.error('Error loading cart from localStorage:', error);
+        localStorage.removeItem('cart');
+      }
     }
   }, []);
 

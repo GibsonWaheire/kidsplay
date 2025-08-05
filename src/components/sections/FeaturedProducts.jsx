@@ -26,7 +26,7 @@ const FeaturedProducts = () => {
     });
   };
 
-    const handleToastClose = () => {
+  const handleToastClose = () => {
     setToast(null);
   };
 
@@ -90,9 +90,9 @@ const FeaturedProducts = () => {
           type={toast.type}
           onClose={handleToastClose}
         />
-             )}
-     </>
-   );
-  };
+      )}
+    </>
+  );
+};
 
 export default FeaturedProducts; 

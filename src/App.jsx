@@ -1,32 +1,30 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { CartProvider } from './context/CartContext'
-import Navbar from './components/layout/Navbar'
+import Layout from './components/layout/Layout'
 import Home from './pages/Home'
+import Products from './pages/Products'
+import ProductDetails from './components/ui/ProductDetails'
+import Categories from './pages/Categories'
 import Cart from './pages/Cart'
 import Login from './pages/Login'
-import ExploreCategories from './components/sections/ExploreCategories'
-
 
 function App() {
-
   return (
     <CartProvider>
       <Router>
-        <div className="min-h-screen">
-          <Navbar />
-          <main className="pt-16">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/categories" element={<div>Categories Page</div>} />
-              <Route path="/products" element={<div>Products Page</div>} />
-              <Route path="/blog" element={<div>Blog Page</div>} />
-              <Route path="/about" element={<div>About Page</div>} />
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/login" element={<Login />} />
-            </Routes>
-          </main>
-        </div>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/products/:id" element={<ProductDetails />} />
+            <Route path="/categories" element={<Categories />} />
+            <Route path="/orders" element={<div className="max-w-7xl mx-auto px-6 py-8"><h1 className="text-3xl font-bold">Orders</h1></div>} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/profile" element={<div className="max-w-7xl mx-auto px-6 py-8"><h1 className="text-3xl font-bold">Profile</h1></div>} />
+          </Routes>
+        </Layout>
       </Router>
     </CartProvider>
   )
