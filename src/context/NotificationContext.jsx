@@ -1,5 +1,5 @@
 import React, { createContext, useReducer, useEffect } from 'react';
-import { NOTIFICATION_TYPES, MAX_NOTIFICATIONS } from '../constants/notifications';
+import { NOTIFICATION_TYPES, MAX_NOTIFICATIONS, MAX_NOTIFICATION_HISTORY } from '../constants/notifications';
 
 const NotificationContext = createContext();
 
@@ -14,9 +14,9 @@ const notificationReducer = (state, action) => {
         read: false
       };
       
-      // Add new notification and keep only the last MAX_NOTIFICATIONS
+      // Add new notification and keep only the last MAX_NOTIFICATION_HISTORY
       const updatedNotifications = [...state.notifications, newNotification]
-        .slice(-MAX_NOTIFICATIONS);
+        .slice(-MAX_NOTIFICATION_HISTORY);
       
       return {
         ...state,
@@ -70,8 +70,8 @@ const NotificationProvider = ({ children }) => {
       try {
         const parsedNotifications = JSON.parse(savedNotifications);
         if (Array.isArray(parsedNotifications)) {
-          // Load only the last MAX_NOTIFICATIONS
-          const recentNotifications = parsedNotifications.slice(-MAX_NOTIFICATIONS);
+          // Load only the last MAX_NOTIFICATION_HISTORY
+          const recentNotifications = parsedNotifications.slice(-MAX_NOTIFICATION_HISTORY);
           recentNotifications.forEach(notification => {
             dispatch({ type: 'ADD_NOTIFICATION', payload: notification });
           });
@@ -93,6 +93,9 @@ const NotificationProvider = ({ children }) => {
 
   // Get recent notifications (last 5)
   const recentNotifications = state.notifications.slice(-MAX_NOTIFICATIONS);
+
+  // Get all notifications for history
+  const allNotifications = state.notifications;
 
   const addNotification = (notification) => {
     dispatch({ type: 'ADD_NOTIFICATION', payload: notification });
@@ -125,6 +128,26 @@ const NotificationProvider = ({ children }) => {
         action: '/cart'
       });
     }
+  };
+
+  const addCartItemAdded = (productName) => {
+    addNotification({
+      type: NOTIFICATION_TYPES.CART_ITEM_ADDED,
+      title: 'Item Added to Cart',
+      message: `${productName} has been added to your cart.`,
+      icon: '🛒',
+      action: '/cart'
+    });
+  };
+
+  const addCartItemRemoved = (productName) => {
+    addNotification({
+      type: NOTIFICATION_TYPES.CART_ITEM_REMOVED,
+      title: 'Item Removed from Cart',
+      message: `${productName} has been removed from your cart.`,
+      icon: '🗑️',
+      action: '/cart'
+    });
   };
 
   const addOrderConfirmation = (orderNumber) => {
@@ -180,6 +203,7 @@ const NotificationProvider = ({ children }) => {
   const value = {
     notifications: state.notifications,
     recentNotifications,
+    allNotifications,
     unreadCount,
     addNotification,
     removeNotification,
@@ -187,6 +211,8 @@ const NotificationProvider = ({ children }) => {
     markAllAsRead,
     clearAll,
     addCartReminder,
+    addCartItemAdded,
+    addCartItemRemoved,
     addOrderConfirmation,
     addDownloadReady,
     addPaymentIssue,

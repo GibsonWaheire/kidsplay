@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useReducer, useEffect } from 'react';
 
 const CartContext = createContext();
 
@@ -101,9 +101,9 @@ const CartProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('cartData', JSON.stringify({
       items: state.items,
-      orders: state.orders || [],
+      orders: state.orders
     }));
-  }, [state]);
+  }, [state.items, state.orders]);
 
   // Calculate total items in cart
   const totalItems = state.items.reduce((total, item) => total + item.quantity, 0);
@@ -128,22 +128,19 @@ const CartProvider = ({ children }) => {
   };
 
   const processOrder = () => {
-    if (state.items.length === 0) {
-      throw new Error('Cart is empty');
-    }
     dispatch({ type: 'PROCESS_ORDER' });
   };
 
   const value = {
     items: state.items,
-    orders: state.orders || [],
+    orders: state.orders,
     totalItems,
     totalPrice,
     addToCart,
     removeFromCart,
     updateQuantity,
     clearCart,
-    processOrder,
+    processOrder
   };
 
   return (
@@ -153,13 +150,4 @@ const CartProvider = ({ children }) => {
   );
 };
 
-// Custom hook to use cart context
-const useCart = () => {
-  const context = useContext(CartContext);
-  if (!context) {
-    throw new Error('useCart must be used within a CartProvider');
-  }
-  return context;
-};
-
-export { CartProvider, useCart }; 
+export { CartProvider, CartContext }; 

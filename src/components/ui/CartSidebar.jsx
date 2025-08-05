@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useCart } from '../../context/CartContext';
+import { useCart } from '../../hooks/useCart';
 import { useNotifications } from '../../hooks/useNotifications';
 
 const CartSidebar = ({ isOpen, onClose }) => {

@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
+import Footer from './Footer';
 import StickyNotificationPanel from '../ui/StickyNotificationPanel';
 
 const Layout = ({ children }) => {
@@ -8,14 +9,14 @@ const Layout = ({ children }) => {
   const notificationPanelRef = useRef(null);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Navbar */}
       <Navbar onMenuClick={() => setSidebarOpen(true)} notificationPanelRef={notificationPanelRef} />
       
       {/* Sticky Notification Panel */}
       <StickyNotificationPanel ref={notificationPanelRef} />
       
-      <div className="flex pt-16">
+      <div className="flex flex-1 pt-16">
         {/* Sidebar */}
         <div className="lg:flex-shrink-0">
           <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
@@ -26,6 +27,9 @@ const Layout = ({ children }) => {
           {children}
         </main>
       </div>
+      
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };

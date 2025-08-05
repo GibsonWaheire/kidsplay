@@ -1,19 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useNotifications } from '../../context/NotificationContext';
+import { useNotifications } from '../../hooks/useNotifications';
 
 const NotificationDropdown = ({ isOpen, onClose }) => {
-  const { notifications, unreadCount, markAsRead, markAllAsRead, removeNotification } = useNotifications();
-  const [filter, setFilter] = useState('all');
+  const { 
+    recentNotifications, 
+    allNotifications, 
+    unreadCount, 
+    markAsRead, 
+    removeNotification, 
+    markAllAsRead 
+  } = useNotifications();
+  const [showHistory, setShowHistory] = useState(false);
   const dropdownRef = useRef(null);
   const location = useLocation();
-
-  // Debug logging
-  useEffect(() => {
-    if (isOpen) {
-      console.log('NotificationDropdown: isOpen = true, notifications count:', notifications.length, 'unread:', unreadCount);
-    }
-  }, [isOpen, notifications.length, unreadCount]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -44,20 +44,14 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
     onClose();
   };
 
-  const handleMarkAllAsRead = () => {
-    markAllAsRead();
-  };
-
-  const handleRemoveNotification = (e, notificationId) => {
+  const handleDismissNotification = (e, notificationId) => {
     e.stopPropagation();
     removeNotification(notificationId);
   };
 
-  const filteredNotifications = notifications.filter(notification => {
-    if (filter === 'all') return true;
-    if (filter === 'unread') return !notification.read;
-    return notification.type === filter;
-  });
+  const handleMarkAllAsRead = () => {
+    markAllAsRead();
+  };
 
   const formatTimeAgo = (dateString) => {
     const now = new Date();
@@ -74,6 +68,10 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
     switch (type) {
       case 'cart_reminder':
         return '🛒';
+      case 'cart_item_added':
+        return '➕';
+      case 'cart_item_removed':
+        return '🗑️';
       case 'order_confirmation':
         return '✅';
       case 'order_shipped':
@@ -95,10 +93,24 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
     }
   };
 
-  // Don't render anything if not open
-  if (!isOpen) {
-    return null;
-  }
+  const getNotificationColor = (type) => {
+    switch (type) {
+      case 'cart_item_added':
+        return 'bg-green-50 border-green-200 text-green-800';
+      case 'cart_item_removed':
+        return 'bg-red-50 border-red-200 text-red-800';
+      case 'order_confirmation':
+        return 'bg-blue-50 border-blue-200 text-blue-800';
+      case 'payment_issue':
+        return 'bg-yellow-50 border-yellow-200 text-yellow-800';
+      default:
+        return 'bg-gray-50 border-gray-200 text-gray-800';
+    }
+  };
+
+  const notificationsToShow = showHistory ? allNotifications : recentNotifications;
+
+  if (!isOpen) return null;
 
   return (
     <>
@@ -111,75 +123,63 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
       {/* Dropdown */}
       <div 
         ref={dropdownRef}
-        className="absolute top-full right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-gray-200 z-50 transform transition-all duration-300 opacity-100 scale-100 translate-y-0"
-        style={{ minHeight: '400px', maxHeight: '600px' }}
+        className="absolute top-full right-0 mt-2 w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 z-50 max-h-96 overflow-hidden"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <div>
-            <h3 className="font-semibold text-gray-900">Notifications</h3>
-            {unreadCount > 0 && (
-              <p className="text-sm text-gray-500 mt-1">
-                You have {unreadCount} new notification{unreadCount > 1 ? 's' : ''}
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <span className="text-2xl">🔔</span>
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900">Notifications</h3>
+              <p className="text-sm text-gray-500">
+                {showHistory ? `Showing all ${allNotifications.length} notifications` : `Showing recent ${recentNotifications.length} notifications`}
               </p>
-            )}
+            </div>
           </div>
           <div className="flex items-center gap-2">
             {unreadCount > 0 && (
               <button
                 onClick={handleMarkAllAsRead}
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                className="px-3 py-1 text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors duration-200"
               >
                 Mark all read
               </button>
             )}
-          </div>
-        </div>
-
-        {/* Filters */}
-        <div className="p-4 border-b border-gray-200">
-          <div className="flex gap-2">
             <button
-              onClick={() => setFilter('all')}
-              className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                filter === 'all' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              onClick={() => setShowHistory(!showHistory)}
+              className="px-3 py-1 text-xs font-medium text-gray-600 hover:text-gray-700 transition-colors duration-200"
             >
-              All ({notifications.length})
-            </button>
-            <button
-              onClick={() => setFilter('unread')}
-              className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                filter === 'unread' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Unread ({unreadCount})
+              {showHistory ? 'Recent' : 'History'}
             </button>
           </div>
         </div>
 
         {/* Notifications List */}
-        <div className="flex-1 overflow-y-auto" style={{ maxHeight: '400px' }}>
-          {filteredNotifications.length === 0 ? (
+        <div className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+          {notificationsToShow.length === 0 ? (
             <div className="p-8 text-center">
               <div className="text-4xl mb-2">🔔</div>
               <p className="text-gray-500">
-                {filter === 'unread' ? 'No unread notifications' : 'No notifications'}
+                {showHistory ? 'No notifications in history' : 'No new notifications'}
               </p>
             </div>
           ) : (
             <div className="divide-y divide-gray-200">
-              {filteredNotifications.map((notification) => (
+              {notificationsToShow.map((notification, index) => (
                 <div
                   key={notification.id}
-                  className={`p-4 hover:bg-gray-50 transition-colors cursor-pointer ${
-                    !notification.read ? 'bg-blue-50' : ''
-                  }`}
+                  className={`p-4 hover:bg-gray-50 transition-all duration-200 cursor-pointer ${
+                    !notification.read ? 'bg-blue-50 border-l-4 border-blue-400' : ''
+                  } ${getNotificationColor(notification.type)}`}
                   onClick={() => handleNotificationClick(notification)}
+                  style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <div className="flex items-start gap-3">
                     {/* Icon */}
@@ -194,8 +194,9 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
                           {notification.title}
                         </h4>
                         <button
-                          onClick={(e) => handleRemoveNotification(e, notification.id)}
-                          className="flex-shrink-0 p-1 text-gray-400 hover:text-red-500 transition-colors"
+                          onClick={(e) => handleDismissNotification(e, notification.id)}
+                          className="flex-shrink-0 p-1 text-gray-400 hover:text-red-500 transition-all duration-200 hover:scale-110"
+                          title="Dismiss notification"
                         >
                           <span className="text-lg">×</span>
                         </button>
@@ -208,7 +209,7 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
                           {formatTimeAgo(notification.createdAt)}
                         </span>
                         {!notification.read && (
-                          <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                          <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
                         )}
                       </div>
                     </div>
@@ -220,14 +221,22 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
         </div>
 
         {/* Footer */}
-        {notifications.length > 0 && (
-          <div className="p-4 border-t border-gray-200">
-            <Link
-              to="/notifications"
-              className="block text-center text-blue-600 hover:text-blue-700 font-medium text-sm"
-            >
-              View all notifications
-            </Link>
+        {allNotifications.length > 0 && (
+          <div className="p-4 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+            <div className="flex items-center justify-between">
+              <Link
+                to="/notifications"
+                className="text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors duration-200"
+                onClick={onClose}
+              >
+                View all notifications
+              </Link>
+              {unreadCount > 0 && (
+                <span className="text-xs text-gray-500">
+                  {unreadCount} unread
+                </span>
+              )}
+            </div>
           </div>
         )}
       </div>

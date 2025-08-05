@@ -1,17 +1,19 @@
 import React from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { useCart } from '../../context/CartContext';
+import { useCart } from '../../hooks/useCart';
 
 const Sidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
   const { totalItems } = useCart();
 
+  // Define navigation items
   const navigation = [
     { name: 'Home', path: '/', icon: '🏠' },
     { name: 'Products', path: '/products', icon: '🎮' },
     { name: 'Categories', path: '/categories', icon: '📂' },
     { name: 'Orders', path: '/orders', icon: '📦' },
     { name: 'Cart', path: '/cart', icon: '🛒', badge: totalItems },
+    { name: 'Profile', path: '/profile', icon: '👤' },
   ];
 
   const isActive = (path) => {
@@ -98,33 +100,12 @@ const Sidebar = ({ isOpen, onClose }) => {
               </p>
               <Link
                 to="/products"
-                className="block w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white text-center py-2 px-4 rounded-lg text-sm font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-105"
+                onClick={() => onClose()}
+                className="block w-full text-center bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
               >
                 Shop Now
               </Link>
             </div>
-
-            {/* Support Widget */}
-            <div className="mt-4 bg-gray-50 rounded-xl p-4">
-              <div className="flex items-center gap-3 mb-2">
-                <span className="text-xl">💬</span>
-                <h3 className="font-semibold text-gray-900 text-sm">Need Help?</h3>
-              </div>
-              <p className="text-xs text-gray-600 mb-3">
-                Our support team is here to help you 24/7
-              </p>
-              <button className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-300 transition-colors duration-200">
-                Contact Support
-              </button>
-            </div>
-          </div>
-
-          {/* Logout */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <button className="flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-gray-700 hover:bg-gray-50 hover:text-red-600 transition-all duration-200 group w-full">
-              <span className="text-xl group-hover:scale-110 transition-transform duration-200">🚪</span>
-              <span>Logout</span>
-            </button>
           </div>
         </nav>
       </div>

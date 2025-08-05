@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useCart } from "../../context/CartContext";
+import { useCart } from "../../hooks/useCart";
 import { useNotifications } from "../../hooks/useNotifications";
-import CartSidebar from "../ui/CartSidebar";
+import NotificationDropdown from "../ui/NotificationDropdown";
 
 const Navbar = ({ onMenuClick, notificationPanelRef }) => {
   const [scrolled, setScrolled] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
-  const { totalItems } = useCart();
-  const { unreadCount, addCartReminder, addNotification } = useNotifications();
+  const [notificationDropdownOpen, setNotificationDropdownOpen] = useState(false);
+  const { totalItems, addToCart } = useCart();
+  const { unreadCount, addCartItemAdded, addCartItemRemoved } = useNotifications();
 
   // Handle scroll effect
   useEffect(() => {
@@ -27,48 +28,26 @@ const Navbar = ({ onMenuClick, notificationPanelRef }) => {
       // Only add cart reminder if there isn't already one
       const existingCartReminder = localStorage.getItem('cartReminderAdded');
       if (!existingCartReminder) {
-        addCartReminder(totalItems);
+        addCartItemAdded(`${totalItems} item${totalItems > 1 ? 's' : ''} in cart`);
         localStorage.setItem('cartReminderAdded', 'true');
       }
     } else {
       // Remove cart reminder when cart is empty
       localStorage.removeItem('cartReminderAdded');
     }
-  }, [totalItems, addCartReminder]);
-
-  // Add some test notifications if none exist (for testing purposes)
-  useEffect(() => {
-    const testNotificationsAdded = localStorage.getItem('testNotificationsAdded');
-    if (!testNotificationsAdded) {
-      // Add a sample notification to test the system
-      addNotification({
-        type: 'product_update',
-        title: 'Welcome to KidzPlay Connect!',
-        message: 'We\'re excited to have you here. Check out our latest educational games!',
-        icon: '🎮',
-        action: '/products'
-      });
-      localStorage.setItem('testNotificationsAdded', 'true');
-    }
-  }, [addNotification]);
+  }, [totalItems, addCartItemAdded]);
 
   const handleNotificationClick = () => {
-    // Focus/highlight the notification panel
-    if (notificationPanelRef?.current) {
-      notificationPanelRef.current.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'start' 
-      });
-      
-      // Add a temporary highlight effect
-      const panel = document.querySelector('[data-notification-panel]');
-      if (panel) {
-        panel.classList.add('ring-4', 'ring-blue-400', 'ring-opacity-50');
-        setTimeout(() => {
-          panel.classList.remove('ring-4', 'ring-blue-400', 'ring-opacity-50');
-        }, 2000);
-      }
-    }
+    setNotificationDropdownOpen(!notificationDropdownOpen);
+  };
+
+  const handleCartItemAdd = (product) => {
+    addToCart(product);
+    addCartItemAdded(product.title || product.name);
+  };
+
+  const handleCartItemRemove = (productName) => {
+    addCartItemRemoved(productName);
   };
 
   return (
@@ -116,6 +95,12 @@ const Navbar = ({ onMenuClick, notificationPanelRef }) => {
                   </span>
                 )}
               </button>
+              
+              {/* Notification Dropdown */}
+              <NotificationDropdown 
+                isOpen={notificationDropdownOpen}
+                onClose={() => setNotificationDropdownOpen(false)}
+              />
             </div>
 
             {/* Cart */}
@@ -143,9 +128,6 @@ const Navbar = ({ onMenuClick, notificationPanelRef }) => {
           </div>
         </div>
       </nav>
-      
-      {/* Cart Sidebar */}
-      <CartSidebar isOpen={cartOpen} onClose={() => setCartOpen(false)} />
     </>
   );
 };
