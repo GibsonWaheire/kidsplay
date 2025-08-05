@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
-import { useNotifications } from "../../context/NotificationContext";
+import { useNotifications } from "../../hooks/useNotifications";
 import CartSidebar from "../ui/CartSidebar";
-import NotificationDropdown from "../ui/NotificationDropdown";
 
-const Navbar = ({ onMenuClick }) => {
+const Navbar = ({ onMenuClick, notificationPanelRef }) => {
   const [scrolled, setScrolled] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
-  const [notificationOpen, setNotificationOpen] = useState(false);
   const { totalItems } = useCart();
-  const { unreadCount, addCartReminder } = useNotifications();
+  const { unreadCount, addCartReminder, addNotification } = useNotifications();
 
   // Handle scroll effect
   useEffect(() => {
@@ -37,6 +35,41 @@ const Navbar = ({ onMenuClick }) => {
       localStorage.removeItem('cartReminderAdded');
     }
   }, [totalItems, addCartReminder]);
+
+  // Add some test notifications if none exist (for testing purposes)
+  useEffect(() => {
+    const testNotificationsAdded = localStorage.getItem('testNotificationsAdded');
+    if (!testNotificationsAdded) {
+      // Add a sample notification to test the system
+      addNotification({
+        type: 'product_update',
+        title: 'Welcome to KidzPlay Connect!',
+        message: 'We\'re excited to have you here. Check out our latest educational games!',
+        icon: '🎮',
+        action: '/products'
+      });
+      localStorage.setItem('testNotificationsAdded', 'true');
+    }
+  }, [addNotification]);
+
+  const handleNotificationClick = () => {
+    // Focus/highlight the notification panel
+    if (notificationPanelRef?.current) {
+      notificationPanelRef.current.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      });
+      
+      // Add a temporary highlight effect
+      const panel = document.querySelector('[data-notification-panel]');
+      if (panel) {
+        panel.classList.add('ring-4', 'ring-blue-400', 'ring-opacity-50');
+        setTimeout(() => {
+          panel.classList.remove('ring-4', 'ring-blue-400', 'ring-opacity-50');
+        }, 2000);
+      }
+    }
+  };
 
   return (
     <>
@@ -72,8 +105,9 @@ const Navbar = ({ onMenuClick }) => {
             {/* Notifications */}
             <div className="relative">
               <button 
-                onClick={() => setNotificationOpen(!notificationOpen)}
+                onClick={handleNotificationClick}
                 className="relative p-2 rounded-xl hover:bg-gray-100 transition-all duration-300 group cursor-pointer"
+                title="View notifications"
               >
                 <span className="text-2xl group-hover:scale-110 transition-transform duration-300">🔔</span>
                 {unreadCount > 0 && (
@@ -82,12 +116,6 @@ const Navbar = ({ onMenuClick }) => {
                   </span>
                 )}
               </button>
-              
-              {/* Notification Dropdown */}
-              <NotificationDropdown 
-                isOpen={notificationOpen} 
-                onClose={() => setNotificationOpen(false)} 
-              />
             </div>
 
             {/* Cart */}

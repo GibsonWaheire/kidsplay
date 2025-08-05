@@ -1,33 +1,28 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useReducer, useEffect } from 'react';
+import { NOTIFICATION_TYPES, MAX_NOTIFICATIONS } from '../constants/notifications';
 
 const NotificationContext = createContext();
-
-// Notification types
-export const NOTIFICATION_TYPES = {
-  CART_REMINDER: 'cart_reminder',
-  ORDER_CONFIRMATION: 'order_confirmation',
-  ORDER_SHIPPED: 'order_shipped',
-  DOWNLOAD_READY: 'download_ready',
-  PAYMENT_ISSUE: 'payment_issue',
-  SUPPORT_REPLY: 'support_reply',
-  PRODUCT_UPDATE: 'product_update',
-  LOW_STOCK: 'low_stock',
-  SALE_ALERT: 'sale_alert'
-};
 
 // Notification reducer
 const notificationReducer = (state, action) => {
   switch (action.type) {
-    case 'ADD_NOTIFICATION':
+    case 'ADD_NOTIFICATION': {
+      const newNotification = {
+        id: Date.now().toString(),
+        ...action.payload,
+        createdAt: new Date().toISOString(),
+        read: false
+      };
+      
+      // Add new notification and keep only the last MAX_NOTIFICATIONS
+      const updatedNotifications = [...state.notifications, newNotification]
+        .slice(-MAX_NOTIFICATIONS);
+      
       return {
         ...state,
-        notifications: [...state.notifications, {
-          id: Date.now().toString(),
-          ...action.payload,
-          createdAt: new Date().toISOString(),
-          read: false
-        }]
+        notifications: updatedNotifications
       };
+    }
     
     case 'REMOVE_NOTIFICATION':
       return {
@@ -63,7 +58,7 @@ const notificationReducer = (state, action) => {
 };
 
 // Notification provider component
-export const NotificationProvider = ({ children }) => {
+const NotificationProvider = ({ children }) => {
   const [state, dispatch] = useReducer(notificationReducer, {
     notifications: []
   });
@@ -75,7 +70,9 @@ export const NotificationProvider = ({ children }) => {
       try {
         const parsedNotifications = JSON.parse(savedNotifications);
         if (Array.isArray(parsedNotifications)) {
-          parsedNotifications.forEach(notification => {
+          // Load only the last MAX_NOTIFICATIONS
+          const recentNotifications = parsedNotifications.slice(-MAX_NOTIFICATIONS);
+          recentNotifications.forEach(notification => {
             dispatch({ type: 'ADD_NOTIFICATION', payload: notification });
           });
         }
@@ -93,6 +90,9 @@ export const NotificationProvider = ({ children }) => {
 
   // Calculate unread notifications count
   const unreadCount = state.notifications.filter(notification => !notification.read).length;
+
+  // Get recent notifications (last 5)
+  const recentNotifications = state.notifications.slice(-MAX_NOTIFICATIONS);
 
   const addNotification = (notification) => {
     dispatch({ type: 'ADD_NOTIFICATION', payload: notification });
@@ -179,6 +179,7 @@ export const NotificationProvider = ({ children }) => {
 
   const value = {
     notifications: state.notifications,
+    recentNotifications,
     unreadCount,
     addNotification,
     removeNotification,
@@ -200,11 +201,4 @@ export const NotificationProvider = ({ children }) => {
   );
 };
 
-// Custom hook to use notification context
-export const useNotifications = () => {
-  const context = useContext(NotificationContext);
-  if (!context) {
-    throw new Error('useNotifications must be used within a NotificationProvider');
-  }
-  return context;
-}; 
+export { NotificationProvider, NotificationContext }; 

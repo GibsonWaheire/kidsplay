@@ -8,6 +8,13 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
   const dropdownRef = useRef(null);
   const location = useLocation();
 
+  // Debug logging
+  useEffect(() => {
+    if (isOpen) {
+      console.log('NotificationDropdown: isOpen = true, notifications count:', notifications.length, 'unread:', unreadCount);
+    }
+  }, [isOpen, notifications.length, unreadCount]);
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -88,51 +95,35 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
     }
   };
 
-  const getNotificationColor = (type) => {
-    switch (type) {
-      case 'cart_reminder':
-        return 'bg-blue-50 border-blue-200';
-      case 'order_confirmation':
-        return 'bg-green-50 border-green-200';
-      case 'order_shipped':
-        return 'bg-purple-50 border-purple-200';
-      case 'download_ready':
-        return 'bg-green-50 border-green-200';
-      case 'payment_issue':
-        return 'bg-red-50 border-red-200';
-      case 'support_reply':
-        return 'bg-blue-50 border-blue-200';
-      case 'product_update':
-        return 'bg-yellow-50 border-yellow-200';
-      case 'low_stock':
-        return 'bg-orange-50 border-orange-200';
-      case 'sale_alert':
-        return 'bg-pink-50 border-pink-200';
-      default:
-        return 'bg-gray-50 border-gray-200';
-    }
-  };
+  // Don't render anything if not open
+  if (!isOpen) {
+    return null;
+  }
 
   return (
     <>
       {/* Backdrop */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-10 backdrop-blur-sm z-40"
-          onClick={onClose}
-        />
-      )}
+      <div 
+        className="fixed inset-0 bg-black bg-opacity-10 backdrop-blur-sm z-40"
+        onClick={onClose}
+      />
       
       {/* Dropdown */}
       <div 
         ref={dropdownRef}
-        className={`absolute top-full right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-gray-200 z-50 transform transition-all duration-300 ${
-          isOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
-        }`}
+        className="absolute top-full right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-gray-200 z-50 transform transition-all duration-300 opacity-100 scale-100 translate-y-0"
+        style={{ minHeight: '400px', maxHeight: '600px' }}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <h3 className="font-semibold text-gray-900">Notifications</h3>
+          <div>
+            <h3 className="font-semibold text-gray-900">Notifications</h3>
+            {unreadCount > 0 && (
+              <p className="text-sm text-gray-500 mt-1">
+                You have {unreadCount} new notification{unreadCount > 1 ? 's' : ''}
+              </p>
+            )}
+          </div>
           <div className="flex items-center gap-2">
             {unreadCount > 0 && (
               <button
@@ -156,7 +147,7 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              All
+              All ({notifications.length})
             </button>
             <button
               onClick={() => setFilter('unread')}
@@ -172,11 +163,13 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
         </div>
 
         {/* Notifications List */}
-        <div className="max-h-96 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto" style={{ maxHeight: '400px' }}>
           {filteredNotifications.length === 0 ? (
             <div className="p-8 text-center">
               <div className="text-4xl mb-2">🔔</div>
-              <p className="text-gray-500">No notifications</p>
+              <p className="text-gray-500">
+                {filter === 'unread' ? 'No unread notifications' : 'No notifications'}
+              </p>
             </div>
           ) : (
             <div className="divide-y divide-gray-200">

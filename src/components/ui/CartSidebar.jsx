@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useCart } from '../../context/CartContext';
-import { useNotifications } from '../../context/NotificationContext';
+import { useNotifications } from '../../hooks/useNotifications';
 
 const CartSidebar = ({ isOpen, onClose }) => {
   const { items, totalPrice, removeFromCart, updateQuantity, clearCart, processOrder } = useCart();
