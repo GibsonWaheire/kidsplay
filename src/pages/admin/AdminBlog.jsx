@@ -1,18 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
-import { useNotifications } from '../../hooks/useNotifications';
+import { Link } from 'react-router-dom';
 import { database } from '../../lib/supabase';
-import PageContainer from '../../components/layout/PageContainer';
+import Toast from '../../components/ui/Toast';
 
 const AdminBlog = () => {
-  const { user } = useAuth();
-  const { addNotification } = useNotifications();
-  const navigate = useNavigate();
   const [blogPosts, setBlogPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     fetchBlogPosts();
@@ -24,15 +21,15 @@ const AdminBlog = () => {
       const { data, error } = await database.getBlogPosts();
       if (error) throw error;
       setBlogPosts(data || []);
-    } catch (error) {
-      console.error('Error fetching blog posts:', error);
-      addNotification('Failed to load blog posts', 'error');
+    } catch (err) {
+      console.error('Error fetching blog posts:', err);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDeletePost = async (postId) => {
+  const handleDelete = async (postId) => {
     if (!window.confirm('Are you sure you want to delete this blog post?')) {
       return;
     }
@@ -41,11 +38,17 @@ const AdminBlog = () => {
       const { error } = await database.deleteBlogPost(postId);
       if (error) throw error;
       
-      setBlogPosts(blogPosts.filter(post => post.id !== postId));
-      addNotification('Blog post deleted successfully', 'success');
-    } catch (error) {
-      console.error('Error deleting blog post:', error);
-      addNotification('Failed to delete blog post', 'error');
+      setBlogPosts(blogPosts.filter(p => p.id !== postId));
+      setToast({
+        message: 'Blog post deleted successfully!',
+        type: 'success'
+      });
+    } catch (err) {
+      console.error('Error deleting blog post:', err);
+      setToast({
+        message: 'Error deleting blog post: ' + err.message,
+        type: 'error'
+      });
     }
   };
 
@@ -56,15 +59,20 @@ const AdminBlog = () => {
       });
       if (error) throw error;
       
-      setBlogPosts(blogPosts.map(post => 
-        post.id === postId 
-          ? { ...post, published: !currentPublished }
-          : post
+      setBlogPosts(blogPosts.map(p => 
+        p.id === postId ? { ...p, published: !currentPublished } : p
       ));
-      addNotification(`Blog post ${!currentPublished ? 'published' : 'unpublished'} successfully`, 'success');
-    } catch (error) {
-      console.error('Error updating blog post:', error);
-      addNotification('Failed to update blog post', 'error');
+      
+      setToast({
+        message: `Blog post ${!currentPublished ? 'published' : 'unpublished'} successfully!`,
+        type: 'success'
+      });
+    } catch (err) {
+      console.error('Error updating blog post:', err);
+      setToast({
+        message: 'Error updating blog post: ' + err.message,
+        type: 'error'
+      });
     }
   };
 
@@ -75,244 +83,242 @@ const AdminBlog = () => {
       });
       if (error) throw error;
       
-      setBlogPosts(blogPosts.map(post => 
-        post.id === postId 
-          ? { ...post, featured: !currentFeatured }
-          : post
+      setBlogPosts(blogPosts.map(p => 
+        p.id === postId ? { ...p, featured: !currentFeatured } : p
       ));
-      addNotification(`Blog post ${!currentFeatured ? 'featured' : 'unfeatured'} successfully`, 'success');
-    } catch (error) {
-      console.error('Error updating blog post:', error);
-      addNotification('Failed to update blog post', 'error');
+      
+      setToast({
+        message: `Blog post ${!currentFeatured ? 'featured' : 'unfeatured'} successfully!`,
+        type: 'success'
+      });
+    } catch (err) {
+      console.error('Error updating blog post:', err);
+      setToast({
+        message: 'Error updating blog post: ' + err.message,
+        type: 'error'
+      });
     }
   };
 
   const filteredPosts = blogPosts.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         post.excerpt?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         post.content?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = selectedStatus === 'all' || 
-                         (selectedStatus === 'published' && post.published) ||
-                         (selectedStatus === 'draft' && !post.published);
+                         post.excerpt?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = !statusFilter || 
+                         (statusFilter === 'published' && post.published) ||
+                         (statusFilter === 'draft' && !post.published);
     return matchesSearch && matchesStatus;
   });
 
   if (loading) {
     return (
-      <PageContainer className="py-8">
-        <div className="flex items-center justify-center min-h-96">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        </div>
-      </PageContainer>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
     );
   }
 
   return (
-    <PageContainer className="py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Manage Blog Posts</h1>
-            <p className="text-gray-600 mt-2">
-              Create, edit, and manage your blog content
-            </p>
+            <h1 className="text-3xl font-bold text-gray-900">Blog Management</h1>
+            <p className="text-gray-600 mt-2">Manage your blog posts and articles</p>
           </div>
           <Link
             to="/admin/blog/new"
-            className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
+            className="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
           >
             Create New Post
           </Link>
         </div>
-      </div>
 
-      {/* Filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Search Posts
-            </label>
-            <input
-              type="text"
-              placeholder="Search by title, excerpt, or content..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Status
-            </label>
-            <select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="all">All Posts</option>
-              <option value="published">Published</option>
-              <option value="draft">Drafts</option>
-            </select>
-          </div>
-          <div className="flex items-end">
-            <button
-              onClick={() => {
-                setSearchTerm('');
-                setSelectedStatus('all');
-              }}
-              className="w-full bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors"
-            >
-              Clear Filters
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Blog Posts Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Post
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Author
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Category
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredPosts.map((post) => (
-                <tr key={post.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <img
-                        src={post.image || 'https://via.placeholder.com/50'}
-                        alt={post.title}
-                        className="w-12 h-12 rounded-lg object-cover mr-4"
-                      />
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">
-                          {post.title}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {post.excerpt?.substring(0, 50) || post.content?.substring(0, 50)}...
-                        </div>
-                        <div className="text-xs text-gray-400">
-                          {new Date(post.created_at).toLocaleDateString()}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <img
-                        src={post.user_profiles?.avatar || 'https://via.placeholder.com/32'}
-                        alt={post.user_profiles?.first_name}
-                        className="w-8 h-8 rounded-full mr-2"
-                      />
-                      <span className="text-sm text-gray-900">
-                        {post.user_profiles?.first_name} {post.user_profiles?.last_name}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                      {post.category || 'Uncategorized'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center space-x-2">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        post.published 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {post.published ? 'Published' : 'Draft'}
-                      </span>
-                      {post.featured && (
-                        <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
-                          Featured
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => navigate(`/admin/blog/edit/${post.id}`)}
-                        className="text-blue-600 hover:text-blue-900"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleTogglePublished(post.id, post.published)}
-                        className={`${
-                          post.published 
-                            ? 'text-yellow-600 hover:text-yellow-900' 
-                            : 'text-green-600 hover:text-green-900'
-                        }`}
-                      >
-                        {post.published ? 'Unpublish' : 'Publish'}
-                      </button>
-                      <button
-                        onClick={() => handleToggleFeatured(post.id, post.featured)}
-                        className={`${
-                          post.featured 
-                            ? 'text-purple-600 hover:text-purple-900' 
-                            : 'text-gray-600 hover:text-gray-900'
-                        }`}
-                      >
-                        {post.featured ? 'Unfeature' : 'Feature'}
-                      </button>
-                      <button
-                        onClick={() => handleDeletePost(post.id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        
-        {filteredPosts.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-gray-400 text-6xl mb-4">📝</div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No blog posts found</h3>
-            <p className="text-gray-500 mb-4">
-              {searchTerm || selectedStatus !== 'all' 
-                ? 'Try adjusting your search or filter criteria.'
-                : 'Get started by creating your first blog post.'
-              }
-            </p>
-            {!searchTerm && selectedStatus === 'all' && (
-              <Link
-                to="/admin/blog/new"
-                className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
+        {/* Filters */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
+                Search Posts
+              </label>
+              <input
+                type="text"
+                id="search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by title or excerpt..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
+                Filter by Status
+              </label>
+              <select
+                id="status"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               >
-                Create Your First Post
-              </Link>
-            )}
+                <option value="">All Posts</option>
+                <option value="published">Published</option>
+                <option value="draft">Draft</option>
+              </select>
+            </div>
           </div>
-        )}
+        </div>
+
+        {/* Blog Posts Table */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h2 className="text-lg font-medium text-gray-900">
+              Blog Posts ({filteredPosts.length})
+            </h2>
+          </div>
+          
+          {filteredPosts.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-gray-400 text-6xl mb-4">📝</div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No blog posts found</h3>
+              <p className="text-gray-500">
+                {searchTerm || statusFilter 
+                  ? 'Try adjusting your search or filter criteria.'
+                  : 'Get started by creating your first blog post.'
+                }
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Post
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Author
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Category
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredPosts.map((post) => (
+                    <tr key={post.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="flex-shrink-0 h-12 w-12">
+                            <img
+                              className="h-12 w-12 rounded-lg object-cover"
+                              src={post.image || 'https://via.placeholder.com/48'}
+                              alt={post.title}
+                            />
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-gray-900">
+                              {post.title}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {post.excerpt?.substring(0, 60)}...
+                            </div>
+                            <div className="text-xs text-gray-400">
+                              {new Date(post.created_at).toLocaleDateString()}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
+                          {post.user_profiles?.first_name && post.user_profiles?.last_name
+                            ? `${post.user_profiles.first_name} ${post.user_profiles.last_name}`
+                            : 'Unknown Author'
+                          }
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center space-x-2">
+                          {post.published ? (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              Published
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                              Draft
+                            </span>
+                          )}
+                          {post.featured && (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                              Featured
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {post.category || 'Uncategorized'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex items-center space-x-2">
+                          <Link
+                            to={`/admin/blog/edit/${post.id}`}
+                            className="text-blue-600 hover:text-blue-900"
+                          >
+                            Edit
+                          </Link>
+                          <button
+                            onClick={() => handleTogglePublished(post.id, post.published)}
+                            className={`${
+                              post.published 
+                                ? 'text-yellow-600 hover:text-yellow-900' 
+                                : 'text-green-600 hover:text-green-900'
+                            }`}
+                          >
+                            {post.published ? 'Unpublish' : 'Publish'}
+                          </button>
+                          <button
+                            onClick={() => handleToggleFeatured(post.id, post.featured)}
+                            className={`${
+                              post.featured 
+                                ? 'text-purple-600 hover:text-purple-900' 
+                                : 'text-gray-600 hover:text-gray-900'
+                            }`}
+                          >
+                            {post.featured ? 'Unfeature' : 'Feature'}
+                          </button>
+                          <button
+                            onClick={() => handleDelete(post.id)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
-    </PageContainer>
+
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+    </div>
   );
 };
 

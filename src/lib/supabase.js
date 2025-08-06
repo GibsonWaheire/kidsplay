@@ -53,7 +53,7 @@ export const auth = {
 }
 
 export const database = {
-  // Products
+  // Products - Updated to match new structure
   getProducts: async () => {
     const { data, error } = await supabase
       .from('products')
@@ -169,7 +169,7 @@ export const database = {
     return { error }
   },
 
-  // Categories
+  // Categories - Updated to match new structure
   getCategories: async () => {
     const { data, error } = await supabase
       .from('categories')
@@ -204,21 +204,126 @@ export const database = {
     return { error }
   },
 
+  // Stats - New table
+  getStats: async () => {
+    const { data, error } = await supabase
+      .from('stats')
+      .select('*')
+      .order('created_at', { ascending: false })
+    return { data, error }
+  },
+
+  // Admin Stats Operations
+  createStat: async (statData) => {
+    const { data, error } = await supabase
+      .from('stats')
+      .insert([statData])
+      .select()
+    return { data, error }
+  },
+
+  updateStat: async (id, statData) => {
+    const { data, error } = await supabase
+      .from('stats')
+      .update(statData)
+      .eq('id', id)
+      .select()
+    return { data, error }
+  },
+
+  deleteStat: async (id) => {
+    const { error } = await supabase
+      .from('stats')
+      .delete()
+      .eq('id', id)
+    return { error }
+  },
+
+  // Tutors - Updated to match new structure
+  getTutors: async () => {
+    const { data, error } = await supabase
+      .from('tutors')
+      .select('*')
+      .order('name', { ascending: true })
+    return { data, error }
+  },
+
+  // Admin Tutor Operations
+  createTutor: async (tutorData) => {
+    const { data, error } = await supabase
+      .from('tutors')
+      .insert([tutorData])
+      .select()
+    return { data, error }
+  },
+
+  updateTutor: async (id, tutorData) => {
+    const { data, error } = await supabase
+      .from('tutors')
+      .update(tutorData)
+      .eq('id', id)
+      .select()
+    return { data, error }
+  },
+
+  deleteTutor: async (id) => {
+    const { error } = await supabase
+      .from('tutors')
+      .delete()
+      .eq('id', id)
+    return { error }
+  },
+
+  // Testimonials - Updated to match new structure
+  getTestimonials: async () => {
+    const { data, error } = await supabase
+      .from('testimonials')
+      .select('*')
+      .order('created_at', { ascending: false })
+    return { data, error }
+  },
+
+  getFeaturedTestimonials: async () => {
+    const { data, error } = await supabase
+      .from('testimonials')
+      .select('*')
+      .eq('featured', true)
+      .order('created_at', { ascending: false })
+    return { data, error }
+  },
+
+  // Admin Testimonial Operations
+  createTestimonial: async (testimonialData) => {
+    const { data, error } = await supabase
+      .from('testimonials')
+      .insert([testimonialData])
+      .select()
+    return { data, error }
+  },
+
+  updateTestimonial: async (id, testimonialData) => {
+    const { data, error } = await supabase
+      .from('testimonials')
+      .update(testimonialData)
+      .eq('id', id)
+      .select()
+    return { data, error }
+  },
+
+  deleteTestimonial: async (id) => {
+    const { error } = await supabase
+      .from('testimonials')
+      .delete()
+      .eq('id', id)
+    return { error }
+  },
+
   // Special Needs Products
   getSpecialNeedsProducts: async () => {
     const { data, error } = await supabase
       .from('special_needs_products')
       .select('*')
       .order('created_at', { ascending: false })
-    return { data, error }
-  },
-
-  // Tutors
-  getTutors: async () => {
-    const { data, error } = await supabase
-      .from('tutors')
-      .select('*')
-      .order('name', { ascending: true })
     return { data, error }
   },
 

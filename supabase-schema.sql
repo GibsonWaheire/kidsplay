@@ -135,7 +135,7 @@ CREATE TABLE cart_items (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES user_profiles(id) ON DELETE CASCADE,
   product_id UUID REFERENCES products(id) ON DELETE CASCADE,
-  quantity INTEGER DEFAULT 1,
+  quantity INTEGER NOT NULL DEFAULT 1,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(user_id, product_id)
@@ -156,12 +156,18 @@ CREATE TABLE notifications (
 -- Create testimonials table
 CREATE TABLE testimonials (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID REFERENCES user_profiles(id) ON DELETE CASCADE,
-  name TEXT NOT NULL,
-  avatar TEXT,
-  rating INTEGER CHECK (rating >= 1 AND rating <= 5),
-  content TEXT NOT NULL,
-  verified BOOLEAN DEFAULT FALSE,
+  user_name TEXT,
+  content TEXT,
+  rating INTEGER,
+  featured BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create stats table
+CREATE TABLE stats (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  key TEXT NOT NULL,
+  value INTEGER,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -172,47 +178,120 @@ CREATE INDEX idx_orders_user_id ON orders(user_id);
 CREATE INDEX idx_cart_items_user_id ON cart_items(user_id);
 CREATE INDEX idx_notifications_user_id ON notifications(user_id);
 CREATE INDEX idx_notifications_read ON notifications(read);
+CREATE INDEX idx_blog_posts_published ON blog_posts(published);
+CREATE INDEX idx_blog_posts_featured ON blog_posts(featured);
+CREATE INDEX idx_blog_posts_author_id ON blog_posts(author_id);
+CREATE INDEX idx_blog_posts_slug ON blog_posts(slug);
+CREATE INDEX idx_testimonials_featured ON testimonials(featured);
+CREATE INDEX idx_testimonials_rating ON testimonials(rating);
+CREATE INDEX idx_tutors_verified ON tutors(verified);
+CREATE INDEX idx_tutors_subject ON tutors(subject);
 
--- Enable Row Level Security (RLS)
+-- Enable Row Level Security on all tables
 ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE blog_posts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE special_needs_products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tutors ENABLE ROW LEVEL SECURITY;
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE cart_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE testimonials ENABLE ROW LEVEL SECURITY;
+ALTER TABLE stats ENABLE ROW LEVEL SECURITY;
 
--- Create RLS policies
-
--- User profiles policies
+-- RLS Policies for user_profiles
 CREATE POLICY "Users can view their own profile" ON user_profiles
   FOR SELECT USING (auth.uid() = id);
 
 CREATE POLICY "Users can update their own profile" ON user_profiles
   FOR UPDATE USING (auth.uid() = id);
 
-CREATE POLICY "Users can insert their own profile" ON user_profiles
-  FOR INSERT WITH CHECK (auth.uid() = id);
+CREATE POLICY "Admins can view all profiles" ON user_profiles
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM user_profiles 
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
 
--- Categories policies (public read)
-CREATE POLICY "Anyone can view categories" ON categories
+CREATE POLICY "Admins can update all profiles" ON user_profiles
+  FOR UPDATE USING (
+    EXISTS (
+      SELECT 1 FROM user_profiles 
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+
+-- RLS Policies for categories (public read, admin write)
+CREATE POLICY "Public can view categories" ON categories
   FOR SELECT USING (true);
 
--- Products policies (public read)
-CREATE POLICY "Anyone can view products" ON products
+CREATE POLICY "Admins can manage categories" ON categories
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM user_profiles 
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+
+-- RLS Policies for products (public read, admin write)
+CREATE POLICY "Public can view products" ON products
   FOR SELECT USING (true);
 
--- Special needs products policies (public read)
-CREATE POLICY "Anyone can view special needs products" ON special_needs_products
+CREATE POLICY "Admins can manage products" ON products
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM user_profiles 
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+
+-- RLS Policies for blog_posts (public read published, admin write)
+CREATE POLICY "Public can view published blog posts" ON blog_posts
+  FOR SELECT USING (published = true);
+
+CREATE POLICY "Admins can view all blog posts" ON blog_posts
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM user_profiles 
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+
+CREATE POLICY "Admins can manage blog posts" ON blog_posts
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM user_profiles 
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+
+-- RLS Policies for special_needs_products (public read, admin write)
+CREATE POLICY "Public can view special needs products" ON special_needs_products
   FOR SELECT USING (true);
 
--- Tutors policies (public read)
-CREATE POLICY "Anyone can view tutors" ON tutors
+CREATE POLICY "Admins can manage special needs products" ON special_needs_products
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM user_profiles 
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+
+-- RLS Policies for tutors (public read, admin write)
+CREATE POLICY "Public can view tutors" ON tutors
   FOR SELECT USING (true);
 
--- Orders policies
+CREATE POLICY "Admins can manage tutors" ON tutors
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM user_profiles 
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+
+-- RLS Policies for orders (users can view their own, admin can view all)
 CREATE POLICY "Users can view their own orders" ON orders
   FOR SELECT USING (auth.uid() = user_id);
 
@@ -222,37 +301,78 @@ CREATE POLICY "Users can create their own orders" ON orders
 CREATE POLICY "Users can update their own orders" ON orders
   FOR UPDATE USING (auth.uid() = user_id);
 
--- Cart items policies
+CREATE POLICY "Admins can view all orders" ON orders
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM user_profiles 
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+
+CREATE POLICY "Admins can manage all orders" ON orders
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM user_profiles 
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+
+-- RLS Policies for cart_items (users can manage their own)
 CREATE POLICY "Users can view their own cart items" ON cart_items
   FOR SELECT USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can manage their own cart items" ON cart_items
   FOR ALL USING (auth.uid() = user_id);
 
--- Notifications policies
+-- RLS Policies for notifications (users can view their own, admin can view all)
 CREATE POLICY "Users can view their own notifications" ON notifications
   FOR SELECT USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can update their own notifications" ON notifications
   FOR UPDATE USING (auth.uid() = user_id);
 
--- Testimonials policies (public read, authenticated write)
-CREATE POLICY "Anyone can view testimonials" ON testimonials
+CREATE POLICY "Admins can view all notifications" ON notifications
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM user_profiles 
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+
+-- RLS Policies for testimonials (public read, admin write)
+CREATE POLICY "Public can view testimonials" ON testimonials
   FOR SELECT USING (true);
 
-CREATE POLICY "Authenticated users can create testimonials" ON testimonials
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Admins can manage testimonials" ON testimonials
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM user_profiles 
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
 
--- Create functions for automatic timestamps
+-- RLS Policies for stats (public read, admin write)
+CREATE POLICY "Public can view stats" ON stats
+  FOR SELECT USING (true);
+
+CREATE POLICY "Admins can manage stats" ON stats
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM user_profiles 
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+
+-- Create function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
-  NEW.updated_at = NOW();
-  RETURN NEW;
+    NEW.updated_at = NOW();
+    RETURN NEW;
 END;
 $$ language 'plpgsql';
 
--- Create triggers for updated_at
+-- Create triggers for updated_at columns
 CREATE TRIGGER update_user_profiles_updated_at BEFORE UPDATE ON user_profiles
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
@@ -272,6 +392,9 @@ CREATE TRIGGER update_orders_updated_at BEFORE UPDATE ON orders
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_cart_items_updated_at BEFORE UPDATE ON cart_items
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_blog_posts_updated_at BEFORE UPDATE ON blog_posts
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Insert sample data
