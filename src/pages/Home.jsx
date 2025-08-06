@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import Hero from "../components/sections/Hero";
 import ExploreCategories from "../components/sections/ExploreCategories";
 import FeaturedProducts from "../components/sections/FeaturedProducts";
@@ -15,6 +16,7 @@ const Home = () => {
   const [authModalMode, setAuthModalMode] = useState('signin');
   const location = useLocation();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   // Check for auth parameter in URL
   useEffect(() => {
@@ -42,7 +44,7 @@ const Home = () => {
   };
 
   return (
-    <div>
+    <div className={isAuthenticated() ? "px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-12 2xl:-mx-16" : ""}>
       {/* Hero Section */}
       <Hero />
       

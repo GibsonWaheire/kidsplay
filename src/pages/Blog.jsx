@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import PageContainer from '../components/layout/PageContainer';
 
 const Blog = () => {
   const blogPosts = [
@@ -69,7 +70,7 @@ const Blog = () => {
   const categories = ["All", "Education", "Parenting", "Research", "Safety", "Success Stories", "Digital Literacy"];
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8">
+    <PageContainer className="py-8">
       {/* Header */}
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">KidzPlay Connect Blog</h1>
@@ -195,7 +196,7 @@ const Blog = () => {
           </button>
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 };
 

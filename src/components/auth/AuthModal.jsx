@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useNotifications } from '../../hooks/useNotifications';
 
 const AuthModal = ({ isOpen, onClose, initialMode = 'signin', redirectTo = null }) => {
   const [mode, setMode] = useState(initialMode); // 'signin', 'signup', 'forgot'
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -14,6 +17,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'signin', redirectTo = null 
   const [errors, setErrors] = useState({});
 
   const { login, register, forgotPassword } = useAuth();
+  const { setNotificationsEnabled } = useNotifications();
 
   // Reset form when modal opens/closes or mode changes
   useEffect(() => {
@@ -27,12 +31,31 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'signin', redirectTo = null 
       });
       setErrors({});
       setLoading(false);
+      setNotificationsEnabled(true); // Re-enable notifications when modal closes
+    } else {
+      setNotificationsEnabled(false); // Disable notifications when modal opens
     }
-  }, [isOpen]);
+  }, [isOpen, setNotificationsEnabled]);
 
   useEffect(() => {
     setErrors({});
+    setShowPassword(false);
+    setShowConfirmPassword(false);
   }, [mode]);
+
+  // Handle keyboard shortcuts
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyPress);
+      return () => document.removeEventListener('keydown', handleKeyPress);
+    }
+  }, [isOpen, onClose]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -98,10 +121,21 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'signin', redirectTo = null 
       }
 
       if (result.success) {
-        onClose();
-        // Redirect if needed
-        if (redirectTo && (mode === 'signin' || mode === 'signup')) {
-          window.location.href = redirectTo;
+        // Add a brief success message before closing
+        if (mode === 'signup') {
+          setFormData({ ...formData, password: '', confirmPassword: '' });
+          // Show success briefly before closing
+          setTimeout(() => {
+            onClose();
+            if (redirectTo) {
+              window.location.href = redirectTo;
+            }
+          }, 500);
+        } else {
+          onClose();
+          if (redirectTo) {
+            window.location.href = redirectTo;
+          }
         }
       }
     } catch (error) {
@@ -149,8 +183,8 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'signin', redirectTo = null 
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-gradient-to-br from-blue-600/20 to-purple-600/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto border border-white/20">
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-900">{getTitle()}</h2>
@@ -218,17 +252,19 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'signin', redirectTo = null 
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                 Email Address
               </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.email ? 'border-red-300' : 'border-gray-300'
-                }`}
-                placeholder="Enter your email"
-              />
+                              <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  autoFocus
+                  autoComplete="email"
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 ${
+                    errors.email ? 'border-red-300 shake' : 'border-gray-300'
+                  }`}
+                  placeholder="Enter your email"
+                />
               {errors.email && (
                 <p className="mt-1 text-sm text-red-600">{errors.email}</p>
               )}
@@ -240,17 +276,28 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'signin', redirectTo = null 
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                   Password
                 </label>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.password ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                  placeholder="Enter your password"
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
+                    className={`w-full px-3 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 ${
+                      errors.password ? 'border-red-300 shake' : 'border-gray-300'
+                    }`}
+                    placeholder="Enter your password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? "🙈" : "👁️"}
+                  </button>
+                </div>
                 {errors.password && (
                   <p className="mt-1 text-sm text-red-600">{errors.password}</p>
                 )}
@@ -263,17 +310,27 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'signin', redirectTo = null 
                 <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
                   Confirm Password
                 </label>
-                <input
-                  type="password"
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                  placeholder="Confirm your password"
-                />
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleInputChange}
+                    className={`w-full px-3 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
+                    }`}
+                    placeholder="Confirm your password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                  >
+                    {showConfirmPassword ? "🙈" : "👁️"}
+                  </button>
+                </div>
                 {errors.confirmPassword && (
                   <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
                 )}
@@ -284,12 +341,13 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'signin', redirectTo = null 
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-3 px-4 rounded-lg font-semibold text-white transition-colors ${
+              className={`w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-300 ${
                 loading
                   ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700'
+                  : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 hover:scale-105 shadow-lg hover:shadow-xl'
               }`}
             >
+              {loading && <span className="mr-2">⏳</span>}
               {getSubmitText()}
             </button>
           </form>

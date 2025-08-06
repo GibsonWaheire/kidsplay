@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useNotifications } from '../hooks/useNotifications';
+import PageContainer from '../components/layout/PageContainer';
 
 const Notifications = () => {
   const { 
@@ -105,7 +106,7 @@ const Notifications = () => {
   ];
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-8">
+    <PageContainer className="py-8">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center justify-between">
@@ -275,7 +276,7 @@ const Notifications = () => {
           </p>
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 };
 

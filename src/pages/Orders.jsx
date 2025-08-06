@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useCart } from '../hooks/useCart';
+import PageContainer from '../components/layout/PageContainer';
 
 const Orders = () => {
   const { orders } = useCart();
@@ -36,7 +37,7 @@ const Orders = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-8">
+    <PageContainer className="py-8">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Orders</h1>
@@ -151,7 +152,7 @@ const Orders = () => {
           </div>
         )}
       </div>
-    </div>
+    </PageContainer>
   );
 };
 

@@ -72,18 +72,8 @@ const Navbar = ({ onMenuClick, notificationPanelRef }) => {
           : 'bg-white/80 backdrop-blur-sm shadow-sm'
       }`}>
         <div className="flex items-center justify-between px-6 py-4 relative">
-          {/* Left side - Menu button */}
+          {/* Left side - Brand/Logo */}
           <div className="flex items-center">
-            <button
-              onClick={onMenuClick}
-              className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
-            >
-              <span className="text-2xl">☰</span>
-            </button>
-          </div>
-
-          {/* Center - Brand/Logo */}
-          <div className="absolute left-1/2 transform -translate-x-1/2">
             <Link 
               to="/" 
               className="font-bold text-xl text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-300 flex items-center gap-2"
@@ -92,6 +82,27 @@ const Navbar = ({ onMenuClick, notificationPanelRef }) => {
               <span>KidzPlay Connect</span>
             </Link>
           </div>
+
+          {/* Center - Navigation Links for guests */}
+          {!isAuthenticated() && (
+            <div className="hidden md:flex items-center space-x-8">
+              <Link to="/" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+                Home
+              </Link>
+              <Link to="/categories" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+                Categories
+              </Link>
+              <Link to="/products" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+                Products
+              </Link>
+              <Link to="/blog" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+                Blog
+              </Link>
+              <Link to="/about" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+                About
+              </Link>
+            </div>
+          )}
 
           {/* Right side - Actions */}
           <div className="flex items-center gap-4">

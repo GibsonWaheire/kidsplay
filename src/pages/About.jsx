@@ -1,9 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import PageContainer from '../components/layout/PageContainer';
 
 const About = () => {
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8">
+    <PageContainer className="py-8">
       {/* Header */}
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">About KidzPlay Connect</h1>
@@ -132,7 +133,7 @@ const About = () => {
           </Link>
         </div>
       </section>
-    </div>
+    </PageContainer>
   );
 };
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/ui/ProductCard';
+import PageContainer from '../components/layout/PageContainer';
 import { products } from '../data/mockData';
 
 const Products = () => {
@@ -33,7 +34,7 @@ const Products = () => {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8">
+    <PageContainer className="py-8">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">All Products</h1>
@@ -103,7 +104,7 @@ const Products = () => {
           </button>
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 };
 

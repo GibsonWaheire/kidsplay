@@ -52,6 +52,12 @@ const notificationReducer = (state, action) => {
         notifications: []
       };
     
+    case 'SET_NOTIFICATIONS_ENABLED':
+      return {
+        ...state,
+        enabled: action.payload
+      };
+    
     default:
       return state;
   }
@@ -60,7 +66,8 @@ const notificationReducer = (state, action) => {
 // Notification provider component
 const NotificationProvider = ({ children }) => {
   const [state, dispatch] = useReducer(notificationReducer, {
-    notifications: []
+    notifications: [],
+    enabled: true
   });
 
   // Load notifications from localStorage on mount
@@ -98,7 +105,12 @@ const NotificationProvider = ({ children }) => {
   const allNotifications = state.notifications;
 
   const addNotification = (notification) => {
+    if (!state.enabled) return;
     dispatch({ type: 'ADD_NOTIFICATION', payload: notification });
+  };
+
+  const setNotificationsEnabled = (enabled) => {
+    dispatch({ type: 'SET_NOTIFICATIONS_ENABLED', payload: enabled });
   };
 
   const removeNotification = (notificationId) => {
@@ -205,11 +217,13 @@ const NotificationProvider = ({ children }) => {
     recentNotifications,
     allNotifications,
     unreadCount,
+    enabled: state.enabled,
     addNotification,
     removeNotification,
     markAsRead,
     markAllAsRead,
     clearAll,
+    setNotificationsEnabled,
     addCartReminder,
     addCartItemAdded,
     addCartItemRemoved,

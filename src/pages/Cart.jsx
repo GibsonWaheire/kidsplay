@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useCart } from '../hooks/useCart';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
+import PageContainer from '../components/layout/PageContainer';
 import AuthModal from '../components/auth/AuthModal';
 
 const Cart = () => {
@@ -28,7 +29,7 @@ const Cart = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8">
+    <PageContainer className="py-8">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Shopping Cart</h1>
@@ -185,7 +186,7 @@ const Cart = () => {
         initialMode="signin"
         redirectTo="/cart"
       />
-    </div>
+    </PageContainer>
   );
 };
 

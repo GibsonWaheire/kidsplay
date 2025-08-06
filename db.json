@@ -10,6 +10,17 @@
       "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
       "membership": "Free",
       "joinDate": "2025-08-06T05:18:40.140Z"
+    },
+    {
+      "id": 1754458225175,
+      "email": "g.waheir00@gmail.com",
+      "password": "Wa12051990@",
+      "firstName": "Gibson",
+      "lastName": "Giteru",
+      "username": "g.waheir00",
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+      "membership": "Free",
+      "joinDate": "2025-08-06T05:30:25.175Z"
     }
   ],
   "products": [
@@ -81,6 +92,34 @@
       "token": "auth_token_1754457610254",
       "createdAt": "2025-08-06T05:20:10.254Z",
       "expiresAt": "2025-08-07T05:20:10.254Z"
+    },
+    {
+      "id": 1754458225183,
+      "userId": 1754458225175,
+      "token": "auth_token_1754458225183",
+      "createdAt": "2025-08-06T05:30:25.183Z",
+      "expiresAt": "2025-08-07T05:30:25.183Z"
+    },
+    {
+      "id": 1754458332330,
+      "userId": 1754458225175,
+      "token": "auth_token_1754458332330",
+      "createdAt": "2025-08-06T05:32:12.330Z",
+      "expiresAt": "2025-08-07T05:32:12.330Z"
+    },
+    {
+      "id": 1754459388828,
+      "userId": 1754457520140,
+      "token": "auth_token_1754459388828",
+      "createdAt": "2025-08-06T05:49:48.828Z",
+      "expiresAt": "2025-08-07T05:49:48.828Z"
+    },
+    {
+      "id": 1754460115603,
+      "userId": 1754457520140,
+      "token": "auth_token_1754460115603",
+      "createdAt": "2025-08-06T06:01:55.603Z",
+      "expiresAt": "2025-08-07T06:01:55.603Z"
     }
   ]
 }
