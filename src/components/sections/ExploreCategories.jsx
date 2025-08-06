@@ -63,10 +63,12 @@ const ExploreCategories = () => {
                   className={`group bg-white border-2 rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 ${cat.color ? `border-${cat.color}-200` : 'border-gray-200'} hover:border-gray-300 ${cat.accessibility ? 'ring-2 ring-teal-400 ring-opacity-50' : ''} relative`}
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  {/* Featured Badge */}
-                  {cat.accessibility && (
-                    <div className="absolute top-4 right-4 bg-teal-500 text-white text-xs font-bold px-3 py-1 rounded-full z-10">
-                      Inclusive
+                  {/* Highlight Badge */}
+                  {cat.highlight && (
+                    <div className={`absolute top-4 right-4 text-white text-xs font-bold px-3 py-1 rounded-full z-10 ${
+                      cat.accessibility ? 'bg-teal-500' : 'bg-indigo-500'
+                    }`}>
+                      {cat.highlight}
                     </div>
                   )}
 

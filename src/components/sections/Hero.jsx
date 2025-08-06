@@ -44,13 +44,13 @@ export function Hero() {
                 Explore Products
                 <span className="ml-2 group-hover:translate-x-1 transition-transform duration-300">→</span>
               </Link>
-              <a
-                href="#"
+              <Link
+                to="/categories"
                 className="group flex items-center justify-center border-2 border-gray-300 text-lg px-8 py-4 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 hover:border-gray-400 transition-all duration-300 bg-white/80 backdrop-blur"
               >
-                <span className="mr-2 group-hover:scale-110 transition-transform duration-300">▶️</span> 
-                Watch Demo
-              </a>
+                <span className="mr-2 group-hover:scale-110 transition-transform duration-300">🎯</span> 
+                Browse Categories
+              </Link>
             </div>
 
             {/* Enhanced Stats */}

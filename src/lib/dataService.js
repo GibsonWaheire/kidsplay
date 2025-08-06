@@ -1,20 +1,34 @@
 import { supabase } from './supabase';
+import { getSampleData } from '../data/sampleData';
 
 // Data service for all Supabase operations
 export const dataService = {
   // Products - Updated to match new structure
   async getProducts() {
     try {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('created_at', { ascending: false });
+      // TEMPORARY: Always use sample data for testing
+      console.log('Using sample products data (forced for testing)');
+      return getSampleData('products');
       
-      if (error) throw error;
-      return data || [];
+      // Commented out database fetch for testing
+      // const { data, error } = await supabase
+      //   .from('products')
+      //   .select('*')
+      //   .order('created_at', { ascending: false });
+      // 
+      // if (error) throw error;
+      // 
+      // // Return sample data if database is empty
+      // if (!data || data.length === 0) {
+      //   console.log('Using sample products data');
+      //   return getSampleData('products');
+      // }
+      // 
+      // return data;
     } catch (error) {
       console.error('Error fetching products:', error);
-      return [];
+      console.log('Falling back to sample products data');
+      return getSampleData('products');
     }
   },
 
@@ -36,49 +50,39 @@ export const dataService = {
 
   async getFeaturedProducts() {
     try {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('featured', true)
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data || [];
+      // TEMPORARY: Always use sample data for testing
+      console.log('Using sample featured products data (forced for testing)');
+      return getSampleData('products').filter(p => p.featured);
     } catch (error) {
       console.error('Error fetching featured products:', error);
-      return [];
+      console.log('Falling back to sample featured products data');
+      return getSampleData('products').filter(p => p.featured);
     }
   },
 
   // Categories - Updated to match new structure
   async getCategories() {
     try {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .order('name', { ascending: true });
-      
-      if (error) throw error;
-      return data || [];
+      // TEMPORARY: Always use sample data for testing
+      console.log('Using sample categories data (forced for testing)');
+      return getSampleData('categories');
     } catch (error) {
       console.error('Error fetching categories:', error);
-      return [];
+      console.log('Falling back to sample categories data');
+      return getSampleData('categories');
     }
   },
 
   // Stats - New table
   async getStats() {
     try {
-      const { data, error } = await supabase
-        .from('stats')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data || [];
+      // TEMPORARY: Always use sample data for testing
+      console.log('Using sample stats data (forced for testing)');
+      return getSampleData('stats');
     } catch (error) {
       console.error('Error fetching stats:', error);
-      return [];
+      console.log('Falling back to sample stats data');
+      return getSampleData('stats');
     }
   },
 
@@ -91,26 +95,31 @@ export const dataService = {
         .order('name', { ascending: true });
       
       if (error) throw error;
-      return data || [];
+      
+      // Return sample data if database is empty
+      if (!data || data.length === 0) {
+        console.log('Using sample tutors data');
+        return getSampleData('tutors');
+      }
+      
+      return data;
     } catch (error) {
       console.error('Error fetching tutors:', error);
-      return [];
+      console.log('Falling back to sample tutors data');
+      return getSampleData('tutors');
     }
   },
 
   // Testimonials - Updated to match new structure
   async getTestimonials() {
     try {
-      const { data, error } = await supabase
-        .from('testimonials')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data || [];
+      // TEMPORARY: Always use sample data for testing
+      console.log('Using sample testimonials data (forced for testing)');
+      return getSampleData('testimonials');
     } catch (error) {
       console.error('Error fetching testimonials:', error);
-      return [];
+      console.log('Falling back to sample testimonials data');
+      return getSampleData('testimonials');
     }
   },
 

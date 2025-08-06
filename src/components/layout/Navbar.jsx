@@ -123,27 +123,29 @@ const Navbar = () => {
               </Link>
             )}
 
-            {/* Notifications */}
-            <div className="relative">
-              <button 
-                onClick={handleNotificationClick}
-                className="relative p-2 rounded-xl hover:bg-gray-100 transition-all duration-300 group cursor-pointer"
-                title="View notifications"
-              >
-                <span className="text-2xl group-hover:scale-110 transition-transform duration-300">🔔</span>
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                    {unreadCount > 99 ? '99+' : unreadCount}
-                  </span>
-                )}
-              </button>
-              
-              {/* Notification Dropdown */}
-              <NotificationDropdown 
-                isOpen={notificationDropdownOpen}
-                onClose={handleNotificationDropdownClose}
-              />
-            </div>
+            {/* Notifications - Only show for authenticated users */}
+            {isAuthenticated() && (
+              <div className="relative">
+                <button 
+                  onClick={handleNotificationClick}
+                  className="relative p-2 rounded-xl hover:bg-gray-100 transition-all duration-300 group cursor-pointer"
+                  title="View notifications"
+                >
+                  <span className="text-2xl group-hover:scale-110 transition-transform duration-300">🔔</span>
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
+                </button>
+                
+                {/* Notification Dropdown */}
+                <NotificationDropdown 
+                  isOpen={notificationDropdownOpen}
+                  onClose={handleNotificationDropdownClose}
+                />
+              </div>
+            )}
 
             {/* Cart */}
             <Link 

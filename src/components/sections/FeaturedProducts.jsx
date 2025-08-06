@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import ProductCard from "../ui/ProductCard";
 import Toast from "../ui/Toast";
+import LoadingSkeleton from "../ui/LoadingSkeleton";
 import { dataService, fallbackData } from "../../lib/dataService";
 
 const FeaturedProducts = () => {
@@ -57,8 +58,18 @@ const FeaturedProducts = () => {
       <section className="py-20 bg-gradient-to-br from-gray-50 to-white w-full">
         <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
           <div className="max-w-7xl mx-auto">
-            <div className="flex items-center justify-center min-h-[400px]">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            {/* Header Skeleton */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-16">
+              <div className="mb-6 md:mb-0">
+                <div className="h-12 bg-gray-200 rounded w-80 mb-4 animate-pulse"></div>
+                <div className="h-6 bg-gray-200 rounded w-96 animate-pulse"></div>
+              </div>
+              <div className="hidden md:block w-48 h-12 bg-gray-200 rounded-xl animate-pulse"></div>
+            </div>
+            
+            {/* Products Grid Skeleton */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+              <LoadingSkeleton variant="product" count={6} />
             </div>
           </div>
         </div>
