@@ -1,56 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-
-const categories = [
-  {
-    icon: "🎮",
-    name: "Educational Games",
-    desc: "Interactive learning games for children",
-    color: "bg-blue-50 border-blue-200",
-    iconBg: "bg-blue-100",
-    count: "50+ Games"
-  },
-  {
-    icon: "🌱",
-    name: "Adventure Games",
-    desc: "Exciting adventure games for kids",
-    color: "bg-green-50 border-green-200",
-    iconBg: "bg-green-100",
-    count: "30+ Games"
-  },
-  {
-    icon: "🎨",
-    name: "Creative Software",
-    desc: "Tools for creativity and imagination",
-    color: "bg-purple-50 border-purple-200",
-    iconBg: "bg-purple-100",
-    count: "25+ Tools"
-  },
-  {
-    icon: "📖",
-    name: "Digital Books",
-    desc: "Interactive digital books and stories",
-    color: "bg-orange-50 border-orange-200",
-    iconBg: "bg-orange-100",
-    count: "100+ Books"
-  },
-  {
-    icon: "🧩",
-    name: "Game Bundles",
-    desc: "Value packs with multiple games",
-    color: "bg-pink-50 border-pink-200",
-    iconBg: "bg-pink-100",
-    count: "15+ Bundles"
-  },
-  {
-    icon: "🎯",
-    name: "Puzzle Games",
-    desc: "Brain-teasing puzzles and logic games",
-    color: "bg-indigo-50 border-indigo-200",
-    iconBg: "bg-indigo-100",
-    count: "40+ Puzzles"
-  }
-];
+import { categories } from "../../data/categories";
 
 const ExploreCategories = () => (
   <section className="w-full py-20 bg-gradient-to-br from-gray-50 to-white">
@@ -70,12 +20,19 @@ const ExploreCategories = () => (
         {categories.map((cat, index) => (
           <div
             key={cat.name}
-            className={`group bg-white border-2 rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 ${cat.color} hover:border-gray-300`}
+            className={`group bg-white border-2 rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 ${cat.color} hover:border-gray-300 ${cat.featured ? 'ring-2 ring-teal-400 ring-opacity-50' : ''} relative`}
             style={{ animationDelay: `${index * 100}ms` }}
           >
+            {/* Featured Badge */}
+            {cat.featured && (
+              <div className="absolute top-4 right-4 bg-teal-500 text-white text-xs font-bold px-3 py-1 rounded-full z-10">
+                Inclusive
+              </div>
+            )}
+
             {/* Icon */}
             <div className={`w-16 h-16 ${cat.iconBg} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
-              <span className="text-3xl">{cat.icon}</span>
+              <span className="text-3xl" role="img" aria-label={cat.name}>{cat.icon}</span>
             </div>
 
             {/* Content */}
@@ -86,6 +43,26 @@ const ExploreCategories = () => (
               <p className="text-gray-600 leading-relaxed">
                 {cat.desc}
               </p>
+              
+              {/* Accessibility Features */}
+              {cat.accessibilityFeatures && (
+                <div className="pt-2">
+                  <p className="text-xs font-semibold text-teal-700 mb-2">Accessibility Features:</p>
+                  <div className="flex flex-wrap gap-1">
+                    {cat.accessibilityFeatures.slice(0, 2).map((feature) => (
+                      <span key={feature} className="text-xs bg-teal-100 text-teal-700 px-2 py-1 rounded-full">
+                        {feature}
+                      </span>
+                    ))}
+                    {cat.accessibilityFeatures.length > 2 && (
+                      <span className="text-xs bg-teal-100 text-teal-700 px-2 py-1 rounded-full">
+                        +{cat.accessibilityFeatures.length - 2} more
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-center justify-between pt-4">
                 <span className="text-sm font-medium text-gray-500 bg-white px-3 py-1 rounded-full shadow-sm">
                   {cat.count}
@@ -93,9 +70,10 @@ const ExploreCategories = () => (
                 <Link 
                   to={`/categories/${cat.name.toLowerCase().replace(/\s+/g, '-')}`}
                   className="flex items-center text-blue-600 hover:text-blue-700 font-semibold group-hover:translate-x-1 transition-transform duration-300"
+                  aria-label={`Explore ${cat.name} category`}
                 >
                   Explore 
-                  <span className="ml-2 group-hover:translate-x-1 transition-transform duration-300">→</span>
+                  <span className="ml-2 group-hover:translate-x-1 transition-transform duration-300" aria-hidden="true">→</span>
                 </Link>
               </div>
             </div>
