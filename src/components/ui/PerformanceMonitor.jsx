@@ -36,10 +36,10 @@ const PerformanceMonitor = ({ isVisible = false }) => {
       setMetrics(prev => ({ ...prev, bundleSize: totalSize }));
     };
 
-    // Count API calls
+    // Count API calls (Supabase calls)
     const countApiCalls = () => {
       const apiCalls = performance.getEntriesByType('resource')
-        .filter(entry => entry.name.includes('localhost:3001')).length;
+        .filter(entry => entry.name.includes('supabase.co')).length;
       setMetrics(prev => ({ ...prev, apiCalls }));
     };
 

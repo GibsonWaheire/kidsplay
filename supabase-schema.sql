@@ -5,6 +5,7 @@ ALTER DATABASE postgres SET "app.jwt_secret" TO 'your-jwt-secret-here';
 CREATE TYPE membership_type AS ENUM ('Free', 'Premium', 'Pro');
 CREATE TYPE order_status AS ENUM ('pending', 'processing', 'shipped', 'delivered', 'cancelled');
 CREATE TYPE product_category AS ENUM ('Educational', 'Gaming', 'Creative', 'Science', 'Language', 'Math', 'Special Needs');
+CREATE TYPE user_role AS ENUM ('user', 'admin');
 
 -- Create users table (extends Supabase auth.users)
 CREATE TABLE user_profiles (
@@ -15,6 +16,7 @@ CREATE TABLE user_profiles (
   username TEXT UNIQUE,
   avatar TEXT,
   membership membership_type DEFAULT 'Free',
+  role user_role DEFAULT 'user',
   bio TEXT,
   preferences JSONB DEFAULT '{}',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -51,6 +53,26 @@ CREATE TABLE products (
   badge TEXT,
   category_id UUID REFERENCES categories(id),
   in_stock BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create blog posts table
+CREATE TABLE blog_posts (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  title TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  excerpt TEXT,
+  content TEXT NOT NULL,
+  author_id UUID REFERENCES user_profiles(id) ON DELETE CASCADE,
+  featured BOOLEAN DEFAULT FALSE,
+  published BOOLEAN DEFAULT FALSE,
+  category TEXT,
+  read_time INTEGER DEFAULT 5,
+  image TEXT,
+  meta_title TEXT,
+  meta_description TEXT,
+  tags TEXT[],
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

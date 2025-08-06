@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useCart } from "../../hooks/useCart";
 import { useNotifications } from "../../hooks/useNotifications";
 import { useAuth } from "../../hooks/useAuth";
+import { AuthService } from "../../lib/authService";
 import NotificationDropdown from "../ui/NotificationDropdown";
 import AuthModal from "../auth/AuthModal";
 
@@ -63,6 +64,8 @@ const Navbar = () => {
     setNotificationDropdownOpen(false);
   }, []);
 
+  const isAdmin = AuthService.isAdmin(user);
+
   return (
     <>
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -108,6 +111,18 @@ const Navbar = () => {
 
           {/* Right side - Actions */}
           <div className="flex items-center gap-4">
+            {/* Admin Link for admin users */}
+            {isAuthenticated() && isAdmin && (
+              <Link 
+                to="/admin" 
+                className="hidden md:flex items-center gap-2 px-3 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-all duration-300 font-medium text-sm border border-purple-200"
+                title="Admin Dashboard"
+              >
+                <span className="text-lg">⚙️</span>
+                <span>Admin</span>
+              </Link>
+            )}
+
             {/* Notifications */}
             <div className="relative">
               <button 

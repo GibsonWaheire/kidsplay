@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import PageContainer from '../components/layout/PageContainer';
-import { userProfile } from '../data/mockData';
+import { dataService, fallbackData } from '../lib/dataService';
 
 const Profile = () => {
   const { user, updateUser, logout } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
   const [isEditing, setIsEditing] = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [editForm, setEditForm] = useState({
     firstName: '',
     lastName: '',
@@ -15,27 +17,67 @@ const Profile = () => {
     age: ''
   });
 
-  // Initialize form with user data
+  // Load user profile from Supabase
   useEffect(() => {
-    if (user) {
-      setEditForm({
-        firstName: user.firstName || '',
-        lastName: user.lastName || '',
-        bio: user.bio || userProfile.bio,
-        age: user.age || userProfile.age
-      });
-    }
+    const loadUserProfile = async () => {
+      if (user?.id) {
+        try {
+          setLoading(true);
+          const profile = await dataService.getUserProfile(user.id);
+          setUserProfile(profile);
+        } catch (err) {
+          console.error('Error loading user profile:', err);
+          // Use fallback data if Supabase is not available
+          setUserProfile(fallbackData.userProfile);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadUserProfile();
   }, [user]);
 
-  const handleEditSubmit = (e) => {
+  // Initialize form with user data
+  useEffect(() => {
+    if (user || userProfile) {
+      setEditForm({
+        firstName: user?.firstName || userProfile?.first_name || '',
+        lastName: user?.lastName || userProfile?.last_name || '',
+        bio: user?.bio || userProfile?.bio || '',
+        age: user?.age || userProfile?.age || ''
+      });
+    }
+  }, [user, userProfile]);
+
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
-    // Update user profile
-    const updatedUser = {
-      ...user,
-      ...editForm
-    };
-    updateUser(updatedUser);
-    setIsEditing(false);
+    try {
+      if (user?.id) {
+        // Update user profile in Supabase
+        const updatedProfile = await dataService.updateUserProfile(user.id, {
+          first_name: editForm.firstName,
+          last_name: editForm.lastName,
+          bio: editForm.bio,
+          age: editForm.age
+        });
+        
+        // Update local user state
+        const updatedUser = {
+          ...user,
+          firstName: editForm.firstName,
+          lastName: editForm.lastName,
+          bio: editForm.bio,
+          age: editForm.age
+        };
+        updateUser(updatedUser);
+        setUserProfile(updatedProfile);
+      }
+      setIsEditing(false);
+    } catch (err) {
+      console.error('Error updating profile:', err);
+      alert('Failed to update profile. Please try again.');
+    }
   };
 
   const formatDate = (dateString) => {
@@ -70,6 +112,22 @@ const Profile = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <PageContainer className="py-8">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </PageContainer>
+    );
+  }
+
+  const currentUser = user || userProfile;
+  const displayName = currentUser?.firstName || currentUser?.first_name || 'User';
+  const displayLastName = currentUser?.lastName || currentUser?.last_name || '';
+  const displayUsername = currentUser?.username || 'user';
+  const displayAvatar = currentUser?.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face';
+
   return (
     <PageContainer className="py-8">
       {/* Header */}
@@ -86,8 +144,8 @@ const Profile = () => {
             <div className="text-center mb-6">
               <div className="relative inline-block">
                 <img
-                  src={user?.avatar || userProfile.avatar}
-                  alt={`${user?.firstName || userProfile.firstName} ${user?.lastName || userProfile.lastName}`}
+                  src={displayAvatar}
+                  alt={`${displayName} ${displayLastName}`}
                   className="w-24 h-24 rounded-full object-cover border-4 border-blue-100 shadow-lg"
                 />
                 <div className="absolute -bottom-2 -right-2 bg-green-500 w-6 h-6 rounded-full border-2 border-white flex items-center justify-center">
@@ -95,36 +153,36 @@ const Profile = () => {
                 </div>
               </div>
               <h2 className="text-xl font-bold text-gray-900 mt-4">
-                {user?.firstName || userProfile.firstName} {user?.lastName || userProfile.lastName}
+                {displayName} {displayLastName}
               </h2>
-              <p className="text-gray-500">@{user?.username || userProfile.username}</p>
+              <p className="text-gray-500">@{displayUsername}</p>
               <span className="inline-block bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-1 rounded-full text-sm font-medium mt-2">
-                {user?.membership || userProfile.membership} Member
+                {user?.membership || userProfile?.membership} Member
               </span>
             </div>
 
             {/* Bio */}
             <div className="mb-6">
               <h3 className="font-semibold text-gray-900 mb-2">Bio</h3>
-              <p className="text-gray-600 text-sm">{user?.bio || userProfile.bio}</p>
+              <p className="text-gray-600 text-sm">{user?.bio || userProfile?.bio}</p>
             </div>
 
             {/* Stats */}
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div className="text-center p-3 bg-blue-50 rounded-xl">
-                <div className="text-2xl font-bold text-blue-600">{userProfile.stats.totalGames}</div>
+                <div className="text-2xl font-bold text-blue-600">{userProfile?.stats?.totalGames || fallbackData.userProfile.stats.totalGames}</div>
                 <div className="text-xs text-gray-600">Games Played</div>
               </div>
               <div className="text-center p-3 bg-purple-50 rounded-xl">
-                <div className="text-2xl font-bold text-purple-600">{userProfile.stats.achievements}</div>
+                <div className="text-2xl font-bold text-purple-600">{userProfile?.stats?.achievements || fallbackData.userProfile.stats.achievements}</div>
                 <div className="text-xs text-gray-600">Achievements</div>
               </div>
               <div className="text-center p-3 bg-green-50 rounded-xl">
-                <div className="text-2xl font-bold text-green-600">{userProfile.stats.totalPlaytime}h</div>
+                <div className="text-2xl font-bold text-green-600">{userProfile?.stats?.totalPlaytime || fallbackData.userProfile.stats.totalPlaytime}h</div>
                 <div className="text-xs text-gray-600">Playtime</div>
               </div>
               <div className="text-center p-3 bg-orange-50 rounded-xl">
-                <div className="text-2xl font-bold text-orange-600">{userProfile.stats.badges}</div>
+                <div className="text-2xl font-bold text-orange-600">{userProfile?.stats?.badges || fallbackData.userProfile.stats.badges}</div>
                 <div className="text-xs text-gray-600">Badges</div>
               </div>
             </div>
@@ -256,19 +314,19 @@ const Profile = () => {
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between">
                             <span className="text-gray-600">Full Name:</span>
-                            <span className="font-medium">{user?.firstName || userProfile.firstName} {user?.lastName || userProfile.lastName}</span>
+                            <span className="font-medium">{user?.firstName || userProfile?.first_name} {user?.lastName || userProfile?.last_name}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600">Age:</span>
-                            <span className="font-medium">{user?.age || userProfile.age} years old</span>
+                            <span className="font-medium">{user?.age || userProfile?.age} years old</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600">Email:</span>
-                            <span className="font-medium">{user?.email || userProfile.email}</span>
+                            <span className="font-medium">{user?.email || userProfile?.email}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600">Member since:</span>
-                            <span className="font-medium">{formatDate(user?.joinDate || userProfile.joinDate)}</span>
+                            <span className="font-medium">{formatDate(user?.joinDate || userProfile?.join_date)}</span>
                           </div>
                         </div>
                       </div>
@@ -277,11 +335,11 @@ const Profile = () => {
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between">
                             <span className="text-gray-600">Total Reviews:</span>
-                            <span className="font-medium">{userProfile.stats.reviews}</span>
+                            <span className="font-medium">{userProfile?.stats?.reviews || fallbackData.userProfile.stats.reviews}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600">Favorites:</span>
-                            <span className="font-medium">{userProfile.stats.favorites}</span>
+                            <span className="font-medium">{userProfile?.stats?.favorites || fallbackData.userProfile.stats.favorites}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600">Average Rating:</span>
@@ -297,7 +355,7 @@ const Profile = () => {
               {/* Achievements Tab */}
               {activeTab === 'achievements' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {userProfile.achievements.map((achievement) => (
+                  {userProfile?.achievements || fallbackData.userProfile.achievements.map((achievement) => (
                     <div
                       key={achievement.id}
                       className={`p-4 rounded-xl border-2 transition-all duration-200 ${
@@ -340,7 +398,7 @@ const Profile = () => {
               {/* Recent Activity Tab */}
               {activeTab === 'activity' && (
                 <div className="space-y-4">
-                  {userProfile.recentActivity.map((activity) => (
+                  {userProfile?.recentActivity || fallbackData.userProfile.recentActivity.map((activity) => (
                     <div key={activity.id} className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
                       <div className="text-2xl">{getActivityIcon(activity.type)}</div>
                       <div className="flex-1">
@@ -359,7 +417,7 @@ const Profile = () => {
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-3">Favorite Categories</h3>
                     <div className="flex flex-wrap gap-2">
-                      {userProfile.preferences.favoriteCategories.map((category) => (
+                      {userProfile?.preferences?.favoriteCategories || fallbackData.userProfile.preferences.favoriteCategories.map((category) => (
                         <span
                           key={category}
                           className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium"
@@ -373,7 +431,7 @@ const Profile = () => {
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-3">Preferred Platforms</h3>
                     <div className="flex flex-wrap gap-2">
-                      {userProfile.preferences.platforms.map((platform) => (
+                      {userProfile?.preferences?.platforms || fallbackData.userProfile.preferences.platforms.map((platform) => (
                         <span
                           key={platform}
                           className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-medium"
@@ -387,7 +445,7 @@ const Profile = () => {
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-3">Notification Settings</h3>
                     <div className="space-y-3">
-                      {Object.entries(userProfile.preferences.notifications).map(([key, value]) => (
+                      {Object.entries(userProfile?.preferences?.notifications || fallbackData.userProfile.preferences.notifications).map(([key, value]) => (
                         <div key={key} className="flex items-center justify-between">
                           <span className="text-gray-700 capitalize">{key} notifications</span>
                           <div className={`w-12 h-6 rounded-full transition-colors duration-200 ${

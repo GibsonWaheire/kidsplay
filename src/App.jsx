@@ -2,7 +2,7 @@ import React, { Suspense, lazy } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { CartProvider } from './context/CartContext'
 import { NotificationProvider } from './context/NotificationContext'
-import { AuthProvider } from './context/AuthContext'
+import { AuthProvider } from './context/AuthContext.jsx'
 import Layout from './components/layout/Layout'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 
@@ -20,6 +20,14 @@ const Profile = lazy(() => import('./pages/Profile'))
 const About = lazy(() => import('./pages/About'))
 const Blog = lazy(() => import('./pages/Blog'))
 const NotFound = lazy(() => import('./pages/NotFound'))
+
+// Admin pages
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
+const AdminProducts = lazy(() => import('./pages/admin/AdminProducts'))
+const AdminBlog = lazy(() => import('./pages/admin/AdminBlog'))
+const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'))
+const ProductForm = lazy(() => import('./components/admin/ProductForm'))
+const BlogPostForm = lazy(() => import('./components/admin/BlogPostForm'))
 
 // Loading component for Suspense fallback
 const LoadingSpinner = () => (
@@ -71,6 +79,48 @@ function App() {
                   <Route path="/profile" element={
                     <ProtectedRoute>
                       <Profile />
+                    </ProtectedRoute>
+                  } />
+                  
+                  {/* Admin Routes - require admin role */}
+                  <Route path="/admin" element={
+                    <ProtectedRoute requireAdmin={true}>
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/admin/products" element={
+                    <ProtectedRoute requireAdmin={true}>
+                      <AdminProducts />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/admin/products/new" element={
+                    <ProtectedRoute requireAdmin={true}>
+                      <ProductForm />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/admin/products/edit/:id" element={
+                    <ProtectedRoute requireAdmin={true}>
+                      <ProductForm />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/admin/blog" element={
+                    <ProtectedRoute requireAdmin={true}>
+                      <AdminBlog />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/admin/blog/new" element={
+                    <ProtectedRoute requireAdmin={true}>
+                      <BlogPostForm />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/admin/blog/edit/:id" element={
+                    <ProtectedRoute requireAdmin={true}>
+                      <BlogPostForm />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/admin/users" element={
+                    <ProtectedRoute requireAdmin={true}>
+                      <AdminUsers />
                     </ProtectedRoute>
                   } />
                   

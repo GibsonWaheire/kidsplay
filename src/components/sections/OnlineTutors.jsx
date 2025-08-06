@@ -1,24 +1,61 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import TutorCard from "../ui/TutorCard";
 import Toast from "../ui/Toast";
-import { tutors, tutorSubjects } from "../../data/tutors";
+import { dataService, fallbackData } from "../../lib/dataService";
 
 const OnlineTutors = () => {
-  const featuredTutors = tutors.filter((tutor) => tutor.featured).slice(0, 6);
+  const [tutors, setTutors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [toast, setToast] = useState(null);
 
+  useEffect(() => {
+    const loadTutors = async () => {
+      try {
+        setLoading(true);
+        const data = await dataService.getTutors();
+        setTutors(data);
+      } catch (err) {
+        console.error('Error loading tutors:', err);
+        setError(err.message);
+        // Use fallback data if Supabase is not available
+        setTutors(fallbackData.tutors || []);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTutors();
+  }, []);
+
+  const featuredTutors = tutors.filter((tutor) => tutor.featured).slice(0, 6);
+
   const handleConnectWithTutor = (tutor) => {
-    if (!isAuthenticated()) {
-      // Redirect to login or show auth modal
-      return;
-    }
     // Handle tutor connection logic here
+    setToast({
+      message: `Connection request sent to ${tutor.name}! They will contact you shortly.`,
+      type: 'success'
+    });
   };
 
   const handleToastClose = () => {
     setToast(null);
   };
+
+  if (loading) {
+    return (
+      <section className="py-20 bg-gradient-to-br from-blue-50 to-purple-50 w-full">
+        <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-center min-h-[400px]">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <>
@@ -36,34 +73,41 @@ const OnlineTutors = () => {
               
               {/* Subject Tags */}
               <div className="flex flex-wrap justify-center gap-3 mb-8">
-                {tutorSubjects.slice(0, 6).map((subject) => (
+                {tutors.slice(0, 6).map((tutor) => (
                   <span
-                    key={subject.name}
+                    key={tutor.id}
                     className="inline-flex items-center gap-2 bg-white text-gray-700 px-4 py-2 rounded-full shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
                   >
-                    <span role="img" aria-label={subject.name}>{subject.icon}</span>
-                    <span className="font-medium">{subject.name}</span>
-                    <span className="text-sm text-gray-500">({subject.count})</span>
+                    <span role="img" aria-label={tutor.subjects?.[0] || 'Subject'}>📚</span>
+                    <span className="font-medium">{tutor.subjects?.[0] || 'General'}</span>
                   </span>
                 ))}
               </div>
             </div>
 
             {/* Tutors Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-              {featuredTutors.map((tutor, index) => (
-                <div 
-                  key={tutor.id} 
-                  className="animate-fade-in"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  <TutorCard 
-                    tutor={tutor} 
-                    onConnect={handleConnectWithTutor}
-                  />
-                </div>
-              ))}
-            </div>
+            {featuredTutors.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+                {featuredTutors.map((tutor, index) => (
+                  <div 
+                    key={tutor.id} 
+                    className="animate-fade-in"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <TutorCard 
+                      tutor={tutor} 
+                      onConnect={handleConnectWithTutor}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">👨‍🏫</div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">No tutors available</h3>
+                <p className="text-gray-500">Check back soon for new tutor profiles!</p>
+              </div>
+            )}
 
             {/* Value Proposition */}
             <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 mb-12">
@@ -98,15 +142,14 @@ const OnlineTutors = () => {
                 to="/tutors"
                 className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center group"
               >
-                View All Tutors
-                <span className="ml-2 group-hover:translate-x-1 transition-transform duration-300">→</span>
+                Browse All Tutors
+                <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
               </Link>
               <Link
-                to="/tutors/book"
-                className="bg-white text-blue-600 border-2 border-blue-600 px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center group"
+                to="/tutors"
+                className="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 border border-blue-200"
               >
-                Book a Session
-                <span className="ml-2 group-hover:translate-x-1 transition-transform duration-300">→</span>
+                Become a Tutor
               </Link>
             </div>
           </div>

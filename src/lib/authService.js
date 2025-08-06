@@ -24,6 +24,7 @@ export const AuthService = {
         username: profile?.username || data.user.email?.split('@')[0] || '',
         avatar: profile?.avatar || data.user.user_metadata?.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
         membership: profile?.membership || 'Free',
+        role: profile?.role || 'user',
         joinDate: profile?.created_at || data.user.created_at
       };
       
@@ -54,7 +55,8 @@ export const AuthService = {
         last_name: userData.lastName,
         username: userData.email.split('@')[0],
         avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
-        membership: 'Free'
+        membership: 'Free',
+        role: 'user'
       };
       
       const { error: profileError } = await database.updateUserProfile(data.user.id, profileData);
@@ -71,6 +73,7 @@ export const AuthService = {
         username: userData.email.split('@')[0],
         avatar: profileData.avatar,
         membership: 'Free',
+        role: 'user',
         joinDate: data.user.created_at
       };
       
@@ -121,6 +124,7 @@ export const AuthService = {
         username: profile?.username || user.email?.split('@')[0] || '',
         avatar: profile?.avatar || user.user_metadata?.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
         membership: profile?.membership || 'Free',
+        role: profile?.role || 'user',
         joinDate: profile?.created_at || user.created_at
       };
       
@@ -144,5 +148,10 @@ export const AuthService = {
       console.error('Error checking session:', error);
       return null;
     }
+  },
+
+  // Check if user is admin
+  isAdmin: (user) => {
+    return user && user.role === 'admin';
   }
 }; 

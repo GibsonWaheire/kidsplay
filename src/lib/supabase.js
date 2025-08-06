@@ -80,6 +80,95 @@ export const database = {
     return { data, error }
   },
 
+  // Admin Product Operations
+  createProduct: async (productData) => {
+    const { data, error } = await supabase
+      .from('products')
+      .insert([productData])
+      .select()
+    return { data, error }
+  },
+
+  updateProduct: async (id, productData) => {
+    const { data, error } = await supabase
+      .from('products')
+      .update(productData)
+      .eq('id', id)
+      .select()
+    return { data, error }
+  },
+
+  deleteProduct: async (id) => {
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', id)
+    return { error }
+  },
+
+  // Blog Posts
+  getBlogPosts: async () => {
+    const { data, error } = await supabase
+      .from('blog_posts')
+      .select('*, user_profiles(first_name, last_name, avatar)')
+      .order('created_at', { ascending: false })
+    return { data, error }
+  },
+
+  getPublishedBlogPosts: async () => {
+    const { data, error } = await supabase
+      .from('blog_posts')
+      .select('*, user_profiles(first_name, last_name, avatar)')
+      .eq('published', true)
+      .order('created_at', { ascending: false })
+    return { data, error }
+  },
+
+  getBlogPostById: async (id) => {
+    const { data, error } = await supabase
+      .from('blog_posts')
+      .select('*, user_profiles(first_name, last_name, avatar)')
+      .eq('id', id)
+      .single()
+    return { data, error }
+  },
+
+  getBlogPostBySlug: async (slug) => {
+    const { data, error } = await supabase
+      .from('blog_posts')
+      .select('*, user_profiles(first_name, last_name, avatar)')
+      .eq('slug', slug)
+      .eq('published', true)
+      .single()
+    return { data, error }
+  },
+
+  // Admin Blog Operations
+  createBlogPost: async (postData) => {
+    const { data, error } = await supabase
+      .from('blog_posts')
+      .insert([postData])
+      .select()
+    return { data, error }
+  },
+
+  updateBlogPost: async (id, postData) => {
+    const { data, error } = await supabase
+      .from('blog_posts')
+      .update(postData)
+      .eq('id', id)
+      .select()
+    return { data, error }
+  },
+
+  deleteBlogPost: async (id) => {
+    const { error } = await supabase
+      .from('blog_posts')
+      .delete()
+      .eq('id', id)
+    return { error }
+  },
+
   // Categories
   getCategories: async () => {
     const { data, error } = await supabase
@@ -87,6 +176,32 @@ export const database = {
       .select('*')
       .order('name', { ascending: true })
     return { data, error }
+  },
+
+  // Admin Category Operations
+  createCategory: async (categoryData) => {
+    const { data, error } = await supabase
+      .from('categories')
+      .insert([categoryData])
+      .select()
+    return { data, error }
+  },
+
+  updateCategory: async (id, categoryData) => {
+    const { data, error } = await supabase
+      .from('categories')
+      .update(categoryData)
+      .eq('id', id)
+      .select()
+    return { data, error }
+  },
+
+  deleteCategory: async (id) => {
+    const { error } = await supabase
+      .from('categories')
+      .delete()
+      .eq('id', id)
+    return { error }
   },
 
   // Special Needs Products
@@ -130,7 +245,7 @@ export const database = {
     const { data, error } = await supabase
       .from('user_profiles')
       .select('*')
-      .eq('user_id', userId)
+      .eq('id', userId)
       .single()
     return { data, error }
   },
@@ -138,7 +253,25 @@ export const database = {
   updateUserProfile: async (userId, profileData) => {
     const { data, error } = await supabase
       .from('user_profiles')
-      .upsert([{ user_id: userId, ...profileData }])
+      .upsert([{ id: userId, ...profileData }])
+      .select()
+    return { data, error }
+  },
+
+  // Admin User Operations
+  getAllUsers: async () => {
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .order('created_at', { ascending: false })
+    return { data, error }
+  },
+
+  updateUserRole: async (userId, role) => {
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .update({ role })
+      .eq('id', userId)
       .select()
     return { data, error }
   }

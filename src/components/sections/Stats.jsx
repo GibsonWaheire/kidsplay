@@ -1,7 +1,30 @@
-import React from 'react';
-import { stats } from '../../data/stats';
+import React, { useState, useEffect } from 'react';
+import { dataService, fallbackData } from '../../lib/dataService';
 
 const Stats = () => {
+  const [stats, setStats] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        setLoading(true);
+        const data = await dataService.getStats();
+        setStats(data);
+      } catch (err) {
+        console.error('Error loading stats:', err);
+        setError(err.message);
+        // Use fallback data if Supabase is not available
+        setStats(fallbackData.stats || []);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadStats();
+  }, []);
+
   const getColorClasses = (color) => {
     switch (color) {
       case 'blue':
@@ -21,6 +44,20 @@ const Stats = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <section className="py-16 bg-gradient-to-br from-gray-50 to-blue-50 w-full">
+        <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-center min-h-[400px]">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-16 bg-gradient-to-br from-gray-50 to-blue-50 w-full">
       <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
@@ -36,29 +73,37 @@ const Stats = () => {
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-            {stats.map((stat) => (
-              <div
-                key={stat.id}
-                className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 text-center hover:shadow-lg transition-all duration-300 hover:scale-105"
-              >
-                {/* Icon */}
-                <div className={`w-16 h-16 mx-auto mb-4 rounded-full border-2 flex items-center justify-center text-2xl ${getColorClasses(stat.color)}`}>
-                  {stat.icon}
+          {stats.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+              {stats.map((stat) => (
+                <div
+                  key={stat.id}
+                  className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 text-center hover:shadow-lg transition-all duration-300 hover:scale-105"
+                >
+                  {/* Icon */}
+                  <div className={`w-16 h-16 mx-auto mb-4 rounded-full border-2 flex items-center justify-center text-2xl ${getColorClasses(stat.color)}`}>
+                    {stat.icon}
+                  </div>
+                  
+                  {/* Number */}
+                  <div className="text-3xl font-bold text-gray-900 mb-2">
+                    {stat.value || stat.number}
+                  </div>
+                  
+                  {/* Description */}
+                  <div className="text-sm text-gray-600 font-medium">
+                    {stat.label || stat.description}
+                  </div>
                 </div>
-                
-                {/* Number */}
-                <div className="text-3xl font-bold text-gray-900 mb-2">
-                  {stat.number}
-                </div>
-                
-                {/* Description */}
-                <div className="text-sm text-gray-600 font-medium">
-                  {stat.description}
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">📊</div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No stats available</h3>
+              <p className="text-gray-500">Check back soon for updated statistics!</p>
+            </div>
+          )}
 
           {/* Trust Indicators */}
           <div className="mt-12 text-center">

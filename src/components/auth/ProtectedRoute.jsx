@@ -1,8 +1,10 @@
 import React from 'react';
+import { useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { AuthService } from '../../lib/authService';
 
-const ProtectedRoute = ({ children, requireAuth = true }) => {
-  const { isAuthenticated, loading } = useAuth();
+const ProtectedRoute = ({ children, requireAuth = true, requireAdmin = false }) => {
+  const { user, isAuthenticated, loading } = useAuth();
   const location = useLocation();
 
   // Show loading spinner while checking authentication
@@ -18,6 +20,12 @@ const ProtectedRoute = ({ children, requireAuth = true }) => {
   if (requireAuth && !isAuthenticated()) {
     // Redirect to home with a flag to show auth modal
     return <Navigate to="/?auth=login" state={{ from: location }} replace />;
+  }
+
+  // If admin role is required and user is not admin
+  if (requireAdmin && (!user || !AuthService.isAdmin(user))) {
+    // Redirect to home with access denied message
+    return <Navigate to="/" state={{ message: 'Access denied. Admin privileges required.' }} replace />;
   }
 
   // If user is authenticated but trying to access auth pages, redirect to profile

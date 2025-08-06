@@ -1,12 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/ui/ProductCard';
 import PageContainer from '../components/layout/PageContainer';
-import { products } from '../data/mockData';
+import { dataService, fallbackData } from '../lib/dataService';
 
 const Products = () => {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('name');
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        setLoading(true);
+        const data = await dataService.getProducts();
+        setProducts(data);
+      } catch (err) {
+        console.error('Error loading products:', err);
+        setError(err.message);
+        // Use fallback data if Supabase is not available
+        setProducts(fallbackData.products);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProducts();
+  }, []);
 
   // Filter and sort products
   const filteredProducts = products
@@ -32,6 +54,34 @@ const Products = () => {
     { id: 'Popular', name: 'Popular' },
     { id: 'New', name: 'New' },
   ];
+
+  if (loading) {
+    return (
+      <PageContainer className="py-8">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </PageContainer>
+    );
+  }
+
+  if (error) {
+    return (
+      <PageContainer className="py-8">
+        <div className="text-center py-12">
+          <div className="text-6xl mb-4">⚠️</div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Error loading products</h3>
+          <p className="text-gray-500 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </PageContainer>
+    );
+  }
 
   return (
     <PageContainer className="py-8">
