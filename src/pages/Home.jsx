@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import Hero from "../components/sections/Hero";
 import ExploreCategories from "../components/sections/ExploreCategories";
 import FeaturedProducts from "../components/sections/FeaturedProducts";
@@ -7,8 +8,39 @@ import Stats from "../components/sections/Stats";
 import Testimonials from "../components/sections/Testimonials";
 import ChildSafety from "../components/sections/ChildSafety";
 import Newsletter from "../components/sections/Newsletter";
+import AuthModal from "../components/auth/AuthModal";
 
 const Home = () => {
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState('signin');
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Check for auth parameter in URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const authParam = urlParams.get('auth');
+    
+    if (authParam === 'login' || authParam === 'signin') {
+      setAuthModalMode('signin');
+      setAuthModalOpen(true);
+    } else if (authParam === 'signup' || authParam === 'register') {
+      setAuthModalMode('signup');
+      setAuthModalOpen(true);
+    }
+  }, [location.search]);
+
+  const handleAuthModalClose = () => {
+    setAuthModalOpen(false);
+    // Clean up URL parameter
+    const urlParams = new URLSearchParams(location.search);
+    if (urlParams.has('auth')) {
+      urlParams.delete('auth');
+      const newSearch = urlParams.toString();
+      navigate(location.pathname + (newSearch ? `?${newSearch}` : ''), { replace: true });
+    }
+  };
+
   return (
     <div>
       {/* Hero Section */}
@@ -34,6 +66,13 @@ const Home = () => {
       
       {/* Stay Updated with Latest Releases - Newsletter Section */}
       <Newsletter />
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={handleAuthModalClose}
+        initialMode={authModalMode}
+      />
     </div>
   );
 };

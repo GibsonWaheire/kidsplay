@@ -1,20 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { userProfile } from '../data/mockData';
 
 const Profile = () => {
+  const { user, updateUser, logout } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
-    firstName: userProfile.firstName,
-    lastName: userProfile.lastName,
-    bio: userProfile.bio,
-    age: userProfile.age
+    firstName: '',
+    lastName: '',
+    bio: '',
+    age: ''
   });
+
+  // Initialize form with user data
+  useEffect(() => {
+    if (user) {
+      setEditForm({
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        bio: user.bio || userProfile.bio,
+        age: user.age || userProfile.age
+      });
+    }
+  }, [user]);
 
   const handleEditSubmit = (e) => {
     e.preventDefault();
-    // Here you would typically update the user profile via API
+    // Update user profile
+    const updatedUser = {
+      ...user,
+      ...editForm
+    };
+    updateUser(updatedUser);
     setIsEditing(false);
   };
 
@@ -66,8 +85,8 @@ const Profile = () => {
             <div className="text-center mb-6">
               <div className="relative inline-block">
                 <img
-                  src={userProfile.avatar}
-                  alt={`${userProfile.firstName} ${userProfile.lastName}`}
+                  src={user?.avatar || userProfile.avatar}
+                  alt={`${user?.firstName || userProfile.firstName} ${user?.lastName || userProfile.lastName}`}
                   className="w-24 h-24 rounded-full object-cover border-4 border-blue-100 shadow-lg"
                 />
                 <div className="absolute -bottom-2 -right-2 bg-green-500 w-6 h-6 rounded-full border-2 border-white flex items-center justify-center">
@@ -75,18 +94,18 @@ const Profile = () => {
                 </div>
               </div>
               <h2 className="text-xl font-bold text-gray-900 mt-4">
-                {userProfile.firstName} {userProfile.lastName}
+                {user?.firstName || userProfile.firstName} {user?.lastName || userProfile.lastName}
               </h2>
-              <p className="text-gray-500">@{userProfile.username}</p>
+              <p className="text-gray-500">@{user?.username || userProfile.username}</p>
               <span className="inline-block bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-1 rounded-full text-sm font-medium mt-2">
-                {userProfile.membership} Member
+                {user?.membership || userProfile.membership} Member
               </span>
             </div>
 
             {/* Bio */}
             <div className="mb-6">
               <h3 className="font-semibold text-gray-900 mb-2">Bio</h3>
-              <p className="text-gray-600 text-sm">{userProfile.bio}</p>
+              <p className="text-gray-600 text-sm">{user?.bio || userProfile.bio}</p>
             </div>
 
             {/* Stats */}
@@ -123,6 +142,12 @@ const Profile = () => {
               >
                 View Orders
               </Link>
+              <button
+                onClick={logout}
+                className="w-full bg-red-100 text-red-700 py-2 px-4 rounded-xl hover:bg-red-200 transition-colors duration-200 font-medium"
+              >
+                Sign Out
+              </button>
             </div>
           </div>
         </div>
@@ -230,19 +255,19 @@ const Profile = () => {
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between">
                             <span className="text-gray-600">Full Name:</span>
-                            <span className="font-medium">{userProfile.firstName} {userProfile.lastName}</span>
+                            <span className="font-medium">{user?.firstName || userProfile.firstName} {user?.lastName || userProfile.lastName}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600">Age:</span>
-                            <span className="font-medium">{userProfile.age} years old</span>
+                            <span className="font-medium">{user?.age || userProfile.age} years old</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600">Email:</span>
-                            <span className="font-medium">{userProfile.email}</span>
+                            <span className="font-medium">{user?.email || userProfile.email}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600">Member since:</span>
-                            <span className="font-medium">{formatDate(userProfile.joinDate)}</span>
+                            <span className="font-medium">{formatDate(user?.joinDate || userProfile.joinDate)}</span>
                           </div>
                         </div>
                       </div>

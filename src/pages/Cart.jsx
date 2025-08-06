@@ -1,15 +1,29 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useCart } from '../hooks/useCart';
+import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
+import AuthModal from '../components/auth/AuthModal';
 
 const Cart = () => {
   const { items, totalPrice, removeFromCart, updateQuantity, clearCart } = useCart();
+  const { isAuthenticated } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const handleQuantityChange = (productId, newQuantity) => {
     if (newQuantity <= 0) {
       removeFromCart(productId);
     } else {
       updateQuantity(productId, newQuantity);
+    }
+  };
+
+  const handleCheckout = () => {
+    if (!isAuthenticated()) {
+      setShowAuthModal(true);
+    } else {
+      // Proceed with actual checkout
+      alert('Proceeding to secure checkout...');
+      // In a real app, this would redirect to a checkout page
     }
   };
 
@@ -135,8 +149,11 @@ const Cart = () => {
               
               {/* Action Buttons */}
               <div className="space-y-3">
-                <button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-105 shadow-lg">
-                  Proceed to Checkout
+                <button 
+                  onClick={handleCheckout}
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-105 shadow-lg"
+                >
+                  {isAuthenticated() ? 'Proceed to Checkout' : 'Sign In to Checkout'}
                 </button>
                 
                 <button
@@ -160,6 +177,14 @@ const Cart = () => {
           </div>
         </div>
       )}
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        initialMode="signin"
+        redirectTo="/cart"
+      />
     </div>
   );
 };

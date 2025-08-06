@@ -1,19 +1,30 @@
 import React from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useCart } from '../../hooks/useCart';
+import { useAuth } from '../../context/AuthContext';
 
 const Sidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
   const { totalItems } = useCart();
+  const { isAuthenticated, user, logout } = useAuth();
 
-  // Define navigation items
-  const navigation = [
+  // Define navigation items based on authentication status
+  const publicNavigation = [
     { name: 'Home', path: '/', icon: '🏠' },
     { name: 'Products', path: '/products', icon: '🎮' },
     { name: 'Categories', path: '/categories', icon: '📂' },
-    { name: 'Orders', path: '/orders', icon: '📦' },
     { name: 'Cart', path: '/cart', icon: '🛒', badge: totalItems },
-    { name: 'Profile', path: '/profile', icon: '👤' },
+  ];
+
+  const authenticatedNavigation = [
+    { name: 'Orders', path: '/orders', icon: '📦', requiresAuth: true },
+    { name: 'Profile', path: '/profile', icon: '👤', requiresAuth: true },
+    { name: 'Notifications', path: '/notifications', icon: '🔔', requiresAuth: true },
+  ];
+
+  const navigation = [
+    ...publicNavigation,
+    ...(isAuthenticated() ? authenticatedNavigation : [])
   ];
 
   const isActive = (path) => {
@@ -84,28 +95,69 @@ const Sidebar = ({ isOpen, onClose }) => {
             ))}
           </div>
 
-          {/* Promotional Content */}
+          {/* User Info / Auth Section */}
           <div className="mt-8 pt-6 border-t border-gray-200">
-            {/* Special Offer Card */}
-            <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-4 border border-blue-200 shadow-sm">
-              <div className="flex items-center gap-3 mb-3">
-                <span className="text-2xl">🎁</span>
-                <div>
-                  <h3 className="font-semibold text-gray-900 text-sm">Special Offer</h3>
-                  <p className="text-xs text-gray-600">Limited Time</p>
+            {isAuthenticated() ? (
+              /* User Info Card */
+              <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-xl p-4 border border-green-200 shadow-sm">
+                <div className="flex items-center gap-3 mb-3">
+                  {user?.avatar ? (
+                    <img 
+                      src={user.avatar} 
+                      alt={user.firstName}
+                      className="w-10 h-10 rounded-full object-cover border-2 border-green-200"
+                    />
+                  ) : (
+                    <span className="text-2xl">👤</span>
+                  )}
+                  <div>
+                    <h3 className="font-semibold text-gray-900 text-sm">
+                      {user?.firstName} {user?.lastName}
+                    </h3>
+                    <p className="text-xs text-gray-600">{user?.membership} Member</p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Link
+                    to="/profile"
+                    onClick={() => onClose()}
+                    className="block w-full text-center bg-gradient-to-r from-green-600 to-blue-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:from-green-700 hover:to-blue-700 transition-all duration-200"
+                  >
+                    View Profile
+                  </Link>
+                  <button
+                    onClick={() => {
+                      logout();
+                      onClose();
+                    }}
+                    className="block w-full text-center bg-red-100 text-red-700 py-2 px-4 rounded-lg text-sm font-medium hover:bg-red-200 transition-all duration-200 border border-red-200"
+                  >
+                    Sign Out
+                  </button>
                 </div>
               </div>
-              <p className="text-sm text-gray-700 mb-3">
-                Get 20% off on all educational bundles this week!
-              </p>
-              <Link
-                to="/products"
-                onClick={() => onClose()}
-                className="block w-full text-center bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
-              >
-                Shop Now
-              </Link>
-            </div>
+            ) : (
+              /* Special Offer Card for Guests */
+              <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-4 border border-blue-200 shadow-sm">
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-2xl">🎁</span>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 text-sm">Special Offer</h3>
+                    <p className="text-xs text-gray-600">Limited Time</p>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-700 mb-3">
+                  Get 20% off on all educational bundles this week!
+                </p>
+                <Link
+                  to="/products"
+                  onClick={() => onClose()}
+                  className="block w-full text-center bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
+                >
+                  Shop Now
+                </Link>
+              </div>
+            )}
           </div>
         </nav>
       </div>

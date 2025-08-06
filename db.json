@@ -1,0 +1,86 @@
+{
+  "users": [
+    {
+      "id": 1754457520140,
+      "email": "pwriter455@gmail.com",
+      "password": "Wa12051990@123",
+      "firstName": "Gibson",
+      "lastName": "Waheire",
+      "username": "pwriter455",
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+      "membership": "Free",
+      "joinDate": "2025-08-06T05:18:40.140Z"
+    }
+  ],
+  "products": [
+    {
+      "id": 1,
+      "title": "Coding for Kids Starter Pack",
+      "description": "Visual programming for beginners with drag-and-drop interface.",
+      "age": "8-16 years",
+      "featured": true,
+      "price": 0,
+      "rating": 4.5,
+      "reviews": 89,
+      "image": "https://images.unsplash.com/photo-1606092195730-5d7b9af1efc5?w=400",
+      "platforms": [
+        "Windows",
+        "macOS",
+        "Linux"
+      ],
+      "badge": "Free"
+    },
+    {
+      "id": 2,
+      "title": "Ultimate Learning Bundle",
+      "description": "Complete educational bundle with games and tools for all ages.",
+      "age": "All ages",
+      "featured": true,
+      "price": 39.99,
+      "oldPrice": 69.99,
+      "rating": 4.8,
+      "reviews": 45,
+      "image": "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=400",
+      "platforms": [
+        "Windows",
+        "macOS",
+        "iOS"
+      ],
+      "badge": "Sale"
+    },
+    {
+      "id": 3,
+      "title": "Math Adventure Pro",
+      "description": "Interactive math games that make learning fun and engaging.",
+      "age": "6-12 years",
+      "featured": true,
+      "price": 24.99,
+      "rating": 4.7,
+      "reviews": 156,
+      "image": "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400",
+      "platforms": [
+        "Windows",
+        "macOS",
+        "Android"
+      ],
+      "badge": "Popular"
+    }
+  ],
+  "orders": [],
+  "sessions": [
+    {
+      "id": 1754457520153,
+      "userId": 1754457520140,
+      "token": "auth_token_1754457520153",
+      "createdAt": "2025-08-06T05:18:40.153Z",
+      "expiresAt": "2025-08-07T05:18:40.153Z"
+    },
+    {
+      "id": 1754457610254,
+      "userId": 1754457520140,
+      "token": "auth_token_1754457610254",
+      "createdAt": "2025-08-06T05:20:10.254Z",
+      "expiresAt": "2025-08-07T05:20:10.254Z"
+    }
+  ]
+}

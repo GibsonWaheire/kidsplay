@@ -2,14 +2,19 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../../hooks/useCart";
 import { useNotifications } from "../../hooks/useNotifications";
+import { useAuth } from "../../context/AuthContext";
 import NotificationDropdown from "../ui/NotificationDropdown";
+import AuthModal from "../auth/AuthModal";
 
 const Navbar = ({ onMenuClick, notificationPanelRef }) => {
   const [scrolled, setScrolled] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [notificationDropdownOpen, setNotificationDropdownOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState('signin');
   const { totalItems, addToCart } = useCart();
   const { unreadCount, addCartItemAdded, addCartItemRemoved } = useNotifications();
+  const { user, isAuthenticated, logout } = useAuth();
 
   // Handle scroll effect
   useEffect(() => {
@@ -48,6 +53,15 @@ const Navbar = ({ onMenuClick, notificationPanelRef }) => {
 
   const handleCartItemRemove = (productName) => {
     addCartItemRemoved(productName);
+  };
+
+  const handleAuthClick = (mode = 'signin') => {
+    setAuthModalMode(mode);
+    setAuthModalOpen(true);
+  };
+
+  const handleLogout = () => {
+    logout();
   };
 
   return (
@@ -117,17 +131,62 @@ const Navbar = ({ onMenuClick, notificationPanelRef }) => {
               )}
             </button>
             
-            {/* User Profile */}
-            <Link 
-              to="/profile" 
-              className="p-2 rounded-xl hover:bg-gray-100 transition-all duration-300 group cursor-pointer"
-              title="Profile"
-            >
-              <span className="text-2xl group-hover:scale-110 transition-transform duration-300">👤</span>
-            </Link>
+            {/* User Profile / Auth */}
+            {isAuthenticated() ? (
+              <div className="flex items-center gap-3">
+                <Link 
+                  to="/profile" 
+                  className="flex items-center gap-2 p-2 rounded-xl hover:bg-gray-100 transition-all duration-300 group cursor-pointer"
+                  title={`Profile - ${user?.firstName}`}
+                >
+                  {user?.avatar ? (
+                    <img 
+                      src={user.avatar} 
+                      alt={user.firstName}
+                      className="w-8 h-8 rounded-full object-cover border-2 border-blue-200"
+                    />
+                  ) : (
+                    <span className="text-2xl group-hover:scale-110 transition-transform duration-300">👤</span>
+                  )}
+                  <span className="hidden sm:block text-sm font-medium text-gray-700">
+                    {user?.firstName}
+                  </span>
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-all duration-300 font-medium text-sm border border-red-200"
+                  title="Sign Out"
+                >
+                  <span className="hidden sm:inline">Sign Out</span>
+                  <span className="sm:hidden">🚪</span>
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleAuthClick('signin')}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+                >
+                  Sign In
+                </button>
+                <button
+                  onClick={() => handleAuthClick('signup')}
+                  className="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Sign Up
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </nav>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        initialMode={authModalMode}
+      />
     </>
   );
 };
