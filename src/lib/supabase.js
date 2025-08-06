@@ -3,14 +3,17 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://your-project-id.supabase.co'
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your_anon_key_here'
 
-// Only throw error if we're in production and missing credentials
-if (import.meta.env.PROD && (!supabaseUrl || !supabaseAnonKey || supabaseUrl === 'https://your-project-id.supabase.co' || supabaseAnonKey === 'your_anon_key_here')) {
-  throw new Error('Missing Supabase environment variables. Please check your .env file.')
-}
+// Check if we have valid Supabase credentials
+const hasValidCredentials = supabaseUrl && 
+  supabaseAnonKey && 
+  supabaseUrl !== 'https://your-project-id.supabase.co' && 
+  supabaseAnonKey !== 'your_anon_key_here' &&
+  import.meta.env.VITE_SUPABASE_URL &&
+  import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Development mode warning
-if (import.meta.env.DEV && (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY)) {
-  console.warn('⚠️ Supabase environment variables not found. Using sample data fallbacks.')
+if (!hasValidCredentials) {
+  console.warn('⚠️ Supabase environment variables not configured. Using sample data fallbacks.');
+  console.log('ℹ️ To use live data, configure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.');
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)

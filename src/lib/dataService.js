@@ -6,25 +6,31 @@ export const dataService = {
   // Products - Updated to match new structure
   async getProducts() {
     try {
-      // TEMPORARY: Always use sample data for testing
-      console.log('Using sample products data (forced for testing)');
-      return getSampleData('products');
+      // Check if Supabase is configured
+      const hasSupabase = import.meta.env.VITE_SUPABASE_URL && 
+        import.meta.env.VITE_SUPABASE_ANON_KEY &&
+        import.meta.env.VITE_SUPABASE_URL !== 'https://your-project-id.supabase.co' &&
+        import.meta.env.VITE_SUPABASE_ANON_KEY !== 'your_anon_key_here';
+
+      if (!hasSupabase) {
+        console.log('Using sample products data (Supabase not configured)');
+        return getSampleData('products');
+      }
+
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
       
-      // Commented out database fetch for testing
-      // const { data, error } = await supabase
-      //   .from('products')
-      //   .select('*')
-      //   .order('created_at', { ascending: false });
-      // 
-      // if (error) throw error;
-      // 
-      // // Return sample data if database is empty
-      // if (!data || data.length === 0) {
-      //   console.log('Using sample products data');
-      //   return getSampleData('products');
-      // }
-      // 
-      // return data;
+      if (error) throw error;
+      
+      // Return sample data if database is empty
+      if (!data || data.length === 0) {
+        console.log('Using sample products data (database empty)');
+        return getSampleData('products');
+      }
+      
+      return data;
     } catch (error) {
       console.error('Error fetching products:', error);
       console.log('Falling back to sample products data');
@@ -50,9 +56,32 @@ export const dataService = {
 
   async getFeaturedProducts() {
     try {
-      // TEMPORARY: Always use sample data for testing
-      console.log('Using sample featured products data (forced for testing)');
-      return getSampleData('products').filter(p => p.featured);
+      // Check if Supabase is configured
+      const hasSupabase = import.meta.env.VITE_SUPABASE_URL && 
+        import.meta.env.VITE_SUPABASE_ANON_KEY &&
+        import.meta.env.VITE_SUPABASE_URL !== 'https://your-project-id.supabase.co' &&
+        import.meta.env.VITE_SUPABASE_ANON_KEY !== 'your_anon_key_here';
+
+      if (!hasSupabase) {
+        console.log('Using sample featured products data (Supabase not configured)');
+        return getSampleData('products').filter(p => p.featured);
+      }
+
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('featured', true)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      // Return sample data if database is empty
+      if (!data || data.length === 0) {
+        console.log('Using sample featured products data (database empty)');
+        return getSampleData('products').filter(p => p.featured);
+      }
+      
+      return data;
     } catch (error) {
       console.error('Error fetching featured products:', error);
       console.log('Falling back to sample featured products data');
@@ -63,9 +92,31 @@ export const dataService = {
   // Categories - Updated to match new structure
   async getCategories() {
     try {
-      // TEMPORARY: Always use sample data for testing
-      console.log('Using sample categories data (forced for testing)');
-      return getSampleData('categories');
+      // Check if Supabase is configured
+      const hasSupabase = import.meta.env.VITE_SUPABASE_URL && 
+        import.meta.env.VITE_SUPABASE_ANON_KEY &&
+        import.meta.env.VITE_SUPABASE_URL !== 'https://your-project-id.supabase.co' &&
+        import.meta.env.VITE_SUPABASE_ANON_KEY !== 'your_anon_key_here';
+
+      if (!hasSupabase) {
+        console.log('Using sample categories data (Supabase not configured)');
+        return getSampleData('categories');
+      }
+
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .order('name');
+      
+      if (error) throw error;
+      
+      // Return sample data if database is empty
+      if (!data || data.length === 0) {
+        console.log('Using sample categories data (database empty)');
+        return getSampleData('categories');
+      }
+      
+      return data;
     } catch (error) {
       console.error('Error fetching categories:', error);
       console.log('Falling back to sample categories data');
@@ -76,9 +127,31 @@ export const dataService = {
   // Stats - New table
   async getStats() {
     try {
-      // TEMPORARY: Always use sample data for testing
-      console.log('Using sample stats data (forced for testing)');
-      return getSampleData('stats');
+      // Check if Supabase is configured
+      const hasSupabase = import.meta.env.VITE_SUPABASE_URL && 
+        import.meta.env.VITE_SUPABASE_ANON_KEY &&
+        import.meta.env.VITE_SUPABASE_URL !== 'https://your-project-id.supabase.co' &&
+        import.meta.env.VITE_SUPABASE_ANON_KEY !== 'your_anon_key_here';
+
+      if (!hasSupabase) {
+        console.log('Using sample stats data (Supabase not configured)');
+        return getSampleData('stats');
+      }
+
+      const { data, error } = await supabase
+        .from('stats')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      // Return sample data if database is empty
+      if (!data || data.length === 0) {
+        console.log('Using sample stats data (database empty)');
+        return getSampleData('stats');
+      }
+      
+      return data;
     } catch (error) {
       console.error('Error fetching stats:', error);
       console.log('Falling back to sample stats data');
@@ -89,6 +162,17 @@ export const dataService = {
   // Tutors - Updated to match new structure
   async getTutors() {
     try {
+      // Check if Supabase is configured
+      const hasSupabase = import.meta.env.VITE_SUPABASE_URL && 
+        import.meta.env.VITE_SUPABASE_ANON_KEY &&
+        import.meta.env.VITE_SUPABASE_URL !== 'https://your-project-id.supabase.co' &&
+        import.meta.env.VITE_SUPABASE_ANON_KEY !== 'your_anon_key_here';
+
+      if (!hasSupabase) {
+        console.log('Using sample tutors data (Supabase not configured)');
+        return getSampleData('tutors');
+      }
+
       const { data, error } = await supabase
         .from('tutors')
         .select('*')
@@ -98,7 +182,7 @@ export const dataService = {
       
       // Return sample data if database is empty
       if (!data || data.length === 0) {
-        console.log('Using sample tutors data');
+        console.log('Using sample tutors data (database empty)');
         return getSampleData('tutors');
       }
       
@@ -113,9 +197,31 @@ export const dataService = {
   // Testimonials - Updated to match new structure
   async getTestimonials() {
     try {
-      // TEMPORARY: Always use sample data for testing
-      console.log('Using sample testimonials data (forced for testing)');
-      return getSampleData('testimonials');
+      // Check if Supabase is configured
+      const hasSupabase = import.meta.env.VITE_SUPABASE_URL && 
+        import.meta.env.VITE_SUPABASE_ANON_KEY &&
+        import.meta.env.VITE_SUPABASE_URL !== 'https://your-project-id.supabase.co' &&
+        import.meta.env.VITE_SUPABASE_ANON_KEY !== 'your_anon_key_here';
+
+      if (!hasSupabase) {
+        console.log('Using sample testimonials data (Supabase not configured)');
+        return getSampleData('testimonials');
+      }
+
+      const { data, error } = await supabase
+        .from('testimonials')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      // Return sample data if database is empty
+      if (!data || data.length === 0) {
+        console.log('Using sample testimonials data (database empty)');
+        return getSampleData('testimonials');
+      }
+      
+      return data;
     } catch (error) {
       console.error('Error fetching testimonials:', error);
       console.log('Falling back to sample testimonials data');
