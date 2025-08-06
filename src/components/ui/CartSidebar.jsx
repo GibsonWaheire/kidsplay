@@ -69,6 +69,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
       }, 3000);
       
     } catch (error) {
+      console.error('Payment failed:', error);
       alert('Payment failed. Please try again.');
     } finally {
       setIsProcessing(false);

@@ -23,19 +23,30 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
       }
     };
 
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
+      // Also close on escape key
+      document.addEventListener('keydown', handleEscape);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
     };
   }, [isOpen, onClose]);
 
   // Close dropdown when route changes
   useEffect(() => {
-    onClose();
-  }, [location.pathname, onClose]);
+    if (isOpen) {
+      onClose();
+    }
+  }, [location.pathname, onClose, isOpen]);
 
   const handleNotificationClick = (notification) => {
     if (!notification.read) {
@@ -110,6 +121,7 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
 
   const notificationsToShow = showHistory ? allNotifications : recentNotifications;
 
+  // Only render if explicitly opened
   if (!isOpen) return null;
 
   return (
@@ -157,6 +169,13 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
               className="px-3 py-1 text-xs font-medium text-gray-600 hover:text-gray-700 transition-colors duration-200"
             >
               {showHistory ? 'Recent' : 'History'}
+            </button>
+            <button
+              onClick={onClose}
+              className="p-1 text-gray-400 hover:text-gray-600 transition-colors duration-200"
+              title="Close notifications"
+            >
+              <span className="text-lg">×</span>
             </button>
           </div>
         </div>
@@ -209,7 +228,9 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
                           {formatTimeAgo(notification.createdAt)}
                         </span>
                         {!notification.read && (
-                          <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            Unread
+                          </span>
                         )}
                       </div>
                     </div>
@@ -221,21 +242,19 @@ const NotificationDropdown = ({ isOpen, onClose }) => {
         </div>
 
         {/* Footer */}
-        {allNotifications.length > 0 && (
-          <div className="p-4 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+        {notificationsToShow.length > 0 && (
+          <div className="p-4 border-t border-gray-200 bg-gray-50">
             <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-500">
+                {unreadCount > 0 ? `${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}` : 'All caught up!'}
+              </span>
               <Link
                 to="/notifications"
-                className="text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors duration-200"
                 onClick={onClose}
+                className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors duration-200"
               >
-                View all notifications
+                View all
               </Link>
-              {unreadCount > 0 && (
-                <span className="text-xs text-gray-500">
-                  {unreadCount} unread
-                </span>
-              )}
             </div>
           </div>
         )}

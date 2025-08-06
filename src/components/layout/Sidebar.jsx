@@ -1,10 +1,9 @@
 import React from 'react';
-import { Link, NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import { useCart } from '../../hooks/useCart';
 import { useAuth } from '../../context/AuthContext';
 
 const Sidebar = () => {
-  const location = useLocation();
   const { totalItems } = useCart();
   const { isAuthenticated, user, logout } = useAuth();
 
@@ -27,13 +26,6 @@ const Sidebar = () => {
     ...(isAuthenticated() ? authenticatedNavigation : [])
   ];
 
-  const isActive = (path) => {
-    if (path === '/') {
-      return location.pathname === '/';
-    }
-    return location.pathname.startsWith(path);
-  };
-
   return (
     <>
       {/* Sidebar - Always visible for authenticated users */}
@@ -55,9 +47,9 @@ const Sidebar = () => {
               <NavLink
                 key={item.name}
                 to={item.path}
-                className={`
+                className={({ isActive }) => `
                   flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200 group
-                  ${isActive(item.path)
+                  ${isActive
                     ? 'bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 border border-blue-200 shadow-sm'
                     : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
                   }

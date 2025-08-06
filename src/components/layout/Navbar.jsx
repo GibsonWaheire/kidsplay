@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../../hooks/useCart";
 import { useNotifications } from "../../hooks/useNotifications";
@@ -6,14 +6,13 @@ import { useAuth } from "../../context/AuthContext";
 import NotificationDropdown from "../ui/NotificationDropdown";
 import AuthModal from "../auth/AuthModal";
 
-const Navbar = ({ onMenuClick, notificationPanelRef }) => {
+const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
-  const [cartOpen, setCartOpen] = useState(false);
   const [notificationDropdownOpen, setNotificationDropdownOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState('signin');
-  const { totalItems, addToCart } = useCart();
-  const { unreadCount, addCartItemAdded, addCartItemRemoved } = useNotifications();
+  const { totalItems } = useCart();
+  const { unreadCount } = useNotifications();
   const { user, isAuthenticated, logout } = useAuth();
 
   // Handle scroll effect
@@ -33,26 +32,16 @@ const Navbar = ({ onMenuClick, notificationPanelRef }) => {
       // Only add cart reminder if there isn't already one
       const existingCartReminder = localStorage.getItem('cartReminderAdded');
       if (!existingCartReminder) {
-        addCartItemAdded(`${totalItems} item${totalItems > 1 ? 's' : ''} in cart`);
         localStorage.setItem('cartReminderAdded', 'true');
       }
     } else {
       // Remove cart reminder when cart is empty
       localStorage.removeItem('cartReminderAdded');
     }
-  }, [totalItems, addCartItemAdded]);
+  }, [totalItems]);
 
   const handleNotificationClick = () => {
     setNotificationDropdownOpen(!notificationDropdownOpen);
-  };
-
-  const handleCartItemAdd = (product) => {
-    addToCart(product);
-    addCartItemAdded(product.title || product.name);
-  };
-
-  const handleCartItemRemove = (productName) => {
-    addCartItemRemoved(productName);
   };
 
   const handleAuthClick = (mode = 'signin') => {
@@ -63,6 +52,16 @@ const Navbar = ({ onMenuClick, notificationPanelRef }) => {
   const handleLogout = () => {
     logout();
   };
+
+  // Memoize the onClose function to prevent infinite re-renders
+  const handleAuthModalClose = useCallback(() => {
+    setAuthModalOpen(false);
+  }, []);
+
+  // Memoize the notification dropdown close function
+  const handleNotificationDropdownClose = useCallback(() => {
+    setNotificationDropdownOpen(false);
+  }, []);
 
   return (
     <>
@@ -124,13 +123,13 @@ const Navbar = ({ onMenuClick, notificationPanelRef }) => {
               {/* Notification Dropdown */}
               <NotificationDropdown 
                 isOpen={notificationDropdownOpen}
-                onClose={() => setNotificationDropdownOpen(false)}
+                onClose={handleNotificationDropdownClose}
               />
             </div>
 
             {/* Cart */}
-            <button 
-              onClick={() => setCartOpen(true)}
+            <Link 
+              to="/cart" 
               className="relative p-2 rounded-xl hover:bg-gray-100 transition-all duration-300 group cursor-pointer"
               title="Cart"
             >
@@ -140,7 +139,7 @@ const Navbar = ({ onMenuClick, notificationPanelRef }) => {
                   {totalItems > 99 ? '99+' : totalItems}
                 </span>
               )}
-            </button>
+            </Link>
             
             {/* User Profile / Auth */}
             {isAuthenticated() ? (
@@ -195,7 +194,7 @@ const Navbar = ({ onMenuClick, notificationPanelRef }) => {
       {/* Auth Modal */}
       <AuthModal
         isOpen={authModalOpen}
-        onClose={() => setAuthModalOpen(false)}
+        onClose={handleAuthModalClose}
         initialMode={authModalMode}
       />
     </>

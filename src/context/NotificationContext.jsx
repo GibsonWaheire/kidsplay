@@ -1,4 +1,4 @@
-import React, { createContext, useReducer, useEffect } from 'react';
+import React, { createContext, useReducer, useEffect, useCallback } from 'react';
 import { NOTIFICATION_TYPES, MAX_NOTIFICATIONS, MAX_NOTIFICATION_HISTORY } from '../constants/notifications';
 
 const NotificationContext = createContext();
@@ -109,9 +109,9 @@ const NotificationProvider = ({ children }) => {
     dispatch({ type: 'ADD_NOTIFICATION', payload: notification });
   };
 
-  const setNotificationsEnabled = (enabled) => {
+  const setNotificationsEnabled = useCallback((enabled) => {
     dispatch({ type: 'SET_NOTIFICATIONS_ENABLED', payload: enabled });
-  };
+  }, []);
 
   const removeNotification = (notificationId) => {
     dispatch({ type: 'REMOVE_NOTIFICATION', payload: notificationId });

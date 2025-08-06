@@ -151,6 +151,7 @@ const AuthService = {
       const user = JSON.parse(userStr);
       return { user, token };
     } catch (error) {
+      console.error('Session check failed:', error);
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');
       return null;

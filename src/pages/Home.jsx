@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Hero from "../components/sections/Hero";
@@ -32,7 +32,7 @@ const Home = () => {
     }
   }, [location.search]);
 
-  const handleAuthModalClose = () => {
+  const handleAuthModalClose = useCallback(() => {
     setAuthModalOpen(false);
     // Clean up URL parameter
     const urlParams = new URLSearchParams(location.search);
@@ -41,7 +41,7 @@ const Home = () => {
       const newSearch = urlParams.toString();
       navigate(location.pathname + (newSearch ? `?${newSearch}` : ''), { replace: true });
     }
-  };
+  }, [location.search, location.pathname, navigate]);
 
   return (
     <div className={isAuthenticated() ? "px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-12 2xl:-mx-16" : ""}>
