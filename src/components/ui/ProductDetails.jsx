@@ -1,37 +1,34 @@
-import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { useCart } from '../../hooks/useCart';
-import { useNotifications } from '../../hooks/useNotifications';
-import { products } from '../../data/mockData';
+import React, { useState } from "react";
+import { useParams } from "react-router-dom";
+import { useCart } from "../../hooks/useCart";
+import { useNotifications } from "../../hooks/useNotifications";
+import { products } from "../../data/mockData";
+import LazyImage from "./LazyImage";
 
 const ProductDetails = () => {
   const { id } = useParams();
+  const [quantity, setQuantity] = useState(1);
   const { addToCart } = useCart();
   const { addCartItemAdded, addDownloadReady } = useNotifications();
-  const [quantity, setQuantity] = useState(1);
 
-  const product = products.find(p => p.id === id);
+  const product = products.find((p) => p.id === parseInt(id));
 
   if (!product) {
     return (
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Product Not Found</h1>
-          <p className="text-gray-600 mb-6">The product you're looking for doesn't exist.</p>
-          <Link
-            to="/products"
-            className="inline-block bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors duration-200"
-          >
-            Back to Products
-          </Link>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Product not found</h1>
+          <p className="text-gray-600">The product you're looking for doesn't exist.</p>
         </div>
       </div>
     );
   }
 
   const handleAddToCart = () => {
-    addToCart({ ...product, quantity });
-    addCartItemAdded(product.title);
+    for (let i = 0; i < quantity; i++) {
+      addToCart(product);
+    }
+    addCartItemAdded(`${quantity} ${quantity === 1 ? 'item' : 'items'} added to cart`);
   };
 
   const handleDownload = () => {
@@ -44,7 +41,7 @@ const ProductDetails = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Product Image */}
         <div className="relative">
-          <img
+          <LazyImage
             src={product.image}
             alt={product.title}
             className="w-full h-96 object-cover rounded-2xl shadow-lg"

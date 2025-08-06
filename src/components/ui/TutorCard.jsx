@@ -1,4 +1,5 @@
 import React from "react";
+import LazyImage from "./LazyImage";
 
 const TutorCard = ({ tutor, onConnect }) => {
   const getAvailabilityColor = (status) => {
@@ -45,7 +46,7 @@ const TutorCard = ({ tutor, onConnect }) => {
       {/* Profile Section */}
       <div className="flex items-center mb-4">
         <div className="relative">
-          <img
+          <LazyImage
             src={tutor.profilePicture}
             alt={`${tutor.name} profile`}
             className="w-16 h-16 rounded-full object-cover border-3 border-white shadow-md"

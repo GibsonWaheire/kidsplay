@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useCart } from '../hooks/useCart';
 import PageContainer from '../components/layout/PageContainer';
+import LazyImage from '../components/ui/LazyImage';
 
 const Orders = () => {
   const { orders } = useCart();
@@ -112,7 +113,7 @@ const Orders = () => {
                       {order.items.map((item) => (
                         <div key={item.id} className="flex items-center justify-between bg-gray-50 rounded-lg p-3">
                           <div className="flex items-center gap-3">
-                            <img
+                            <LazyImage
                               src={item.image}
                               alt={item.title}
                               className="w-12 h-12 object-cover rounded-lg"

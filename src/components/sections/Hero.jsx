@@ -1,47 +1,45 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import LazyImage from "../ui/LazyImage";
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30">
+    <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-purple-50 py-20 lg:py-32">
       {/* Enhanced Background Elements */}
-      <div className="absolute inset-0">
-        <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-gradient-to-r from-blue-200/20 to-purple-200/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-r from-purple-200/20 to-pink-200/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-gradient-to-r from-orange-200/15 to-yellow-200/15 rounded-full blur-2xl animate-pulse delay-500"></div>
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-200/20 to-purple-200/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-purple-200/20 to-pink-200/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
       </div>
-      
-      <div className="max-w-7xl mx-auto relative z-10 py-20 lg:py-32 px-6">
-        <div className="grid lg:grid-cols-2 gap-20 items-center">
-          {/* Content */}
-          <div className="space-y-8 animate-fade-in lg:text-left text-center">
-            <div className="space-y-6">
-              {/* Enhanced Badge */}
-              <span className="inline-block bg-gradient-to-r from-orange-100 to-yellow-100 text-orange-700 text-sm font-semibold px-4 py-2 rounded-full shadow-lg border border-orange-200 hover:scale-105 transition-transform duration-300">
-                🎮 New Platform Launch
-              </span>
-              
-              {/* Enhanced Heading */}
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
-                Premium 
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 block animate-gradient">
-                  Digital Content
-                </span>
-                for Children
-              </h1>
-              
-              {/* Enhanced Description */}
-              <p className="text-xl text-gray-600 max-w-lg lg:mx-0 mx-auto leading-relaxed">
-                Discover amazing educational games, creative software, and interactive content. 
-        
-              </p>
+
+      <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          {/* Enhanced Content */}
+          <div className="text-center lg:text-left space-y-8">
+            {/* Enhanced Badge */}
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold shadow-sm border border-blue-200/50">
+              <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+              Trusted by 15,000+ Families Worldwide
             </div>
 
+            {/* Enhanced Main Heading */}
+            <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
+              Where Learning Meets
+              <span className="block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Fun & Adventure
+              </span>
+            </h1>
+
+            {/* Enhanced Subheading */}
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+              Discover educational games, interactive content, and safe entertainment 
+              designed to spark curiosity and foster learning in children of all ages.
+            </p>
+
             {/* Enhanced CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 lg:justify-start justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Link
                 to="/products"
-                className="group bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-lg font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center justify-center"
+                className="group flex items-center justify-center bg-gradient-to-r from-blue-600 to-purple-600 text-white text-lg px-8 py-4 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 font-semibold"
               >
                 Explore Products
                 <span className="ml-2 group-hover:translate-x-1 transition-transform duration-300">→</span>
@@ -92,7 +90,7 @@ export function Hero() {
                 
                 {/* Enhanced Main Card */}
                 <div className="relative bg-gradient-to-br from-white via-gray-50 to-white rounded-3xl p-8 shadow-2xl transform -rotate-3 hover:rotate-0 transition-all duration-500 hover:shadow-3xl border border-gray-100">
-                  <img
+                  <LazyImage
                     src="https://images.unsplash.com/photo-1606092195730-5d7b9af1efc5?w=600&h=600&fit=crop"
                     alt="Children using educational technology"
                     className="w-full h-full object-cover rounded-2xl shadow-lg"

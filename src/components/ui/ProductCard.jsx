@@ -1,6 +1,7 @@
 import React from "react";
 import { useCart } from "../../hooks/useCart";
 import { useNotifications } from "../../hooks/useNotifications";
+import LazyImage from "./LazyImage";
 
 const ProductCard = ({ product, onDownload, onAddToCart }) => {
   const { addToCart } = useCart();
@@ -40,7 +41,7 @@ const ProductCard = ({ product, onDownload, onAddToCart }) => {
       )}
       
       {/* Image */}
-      <img
+      <LazyImage
         src={product.image}
         alt={product.title}
         className="rounded-lg mb-4 w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"

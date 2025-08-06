@@ -4,6 +4,7 @@ import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import Footer from './Footer';
 import StickyNotificationPanel from '../ui/StickyNotificationPanel';
+import PerformanceMonitor from '../ui/PerformanceMonitor';
 
 const Layout = ({ children }) => {
   const notificationPanelRef = useRef(null);
@@ -15,7 +16,7 @@ const Layout = ({ children }) => {
       {!isAuthenticated() ? (
         <>
           {/* Navbar - Only for guests */}
-          <Navbar onMenuClick={() => {}} notificationPanelRef={notificationPanelRef} />
+          <Navbar notificationPanelRef={notificationPanelRef} />
           
           {/* Sticky Notification Panel */}
           <StickyNotificationPanel ref={notificationPanelRef} />
@@ -46,6 +47,11 @@ const Layout = ({ children }) => {
       
       {/* Footer */}
       <Footer />
+      
+      {/* Performance Monitor - Only in development */}
+      {import.meta.env.DEV && (
+        <PerformanceMonitor isVisible={true} />
+      )}
     </div>
   );
 };
