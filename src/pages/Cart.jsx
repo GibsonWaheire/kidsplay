@@ -9,12 +9,11 @@ const Cart = () => {
   const { items, removeFromCart, clearCart, totalPrice } = useCart();
   const { isAuthenticated } = useAuth();
 
-  const handleQuantityChange = (productId, newQuantity) => {
+  const updateQuantity = (productId, newQuantity) => {
     if (newQuantity < 1) {
       removeFromCart(productId);
     } else {
-      // Update quantity logic would go here
-      console.log(`Update quantity for product ${productId} to ${newQuantity}`);
+      updateCartItemQuantity(productId, newQuantity);
     }
   };
 
@@ -24,7 +23,6 @@ const Cart = () => {
       window.location.href = '/?auth=login';
     } else {
       // Proceed to checkout
-      console.log('Proceeding to checkout...');
     }
   };
 
@@ -95,14 +93,14 @@ const Cart = () => {
                           {/* Quantity Controls */}
                           <div className="flex items-center gap-2">
                             <button
-                              onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
                               className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors duration-200 flex items-center justify-center text-gray-600 font-bold"
                             >
                               -
                             </button>
                             <span className="w-8 text-center font-semibold">{item.quantity}</span>
                             <button
-                              onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
                               className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors duration-200 flex items-center justify-center text-gray-600 font-bold"
                             >
                               +

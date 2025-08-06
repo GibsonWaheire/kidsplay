@@ -8,14 +8,12 @@ const OnlineTutors = () => {
   const featuredTutors = tutors.filter((tutor) => tutor.featured).slice(0, 6);
   const [toast, setToast] = useState(null);
 
-  const handleConnect = (tutor) => {
-    setToast({
-      message: `Connection request sent to ${tutor.name}! They will contact you shortly.`,
-      type: 'success'
-    });
-    
-    // In a real app, you would initiate the connection process here
-    console.log('Connecting with tutor:', tutor);
+  const handleConnectWithTutor = (tutor) => {
+    if (!isAuthenticated()) {
+      // Redirect to login or show auth modal
+      return;
+    }
+    // Handle tutor connection logic here
   };
 
   const handleToastClose = () => {
@@ -61,7 +59,7 @@ const OnlineTutors = () => {
                 >
                   <TutorCard 
                     tutor={tutor} 
-                    onConnect={handleConnect}
+                    onConnect={handleConnectWithTutor}
                   />
                 </div>
               ))}

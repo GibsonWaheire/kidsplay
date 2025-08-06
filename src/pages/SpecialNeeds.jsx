@@ -1,268 +1,179 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import ProductCard from "../components/ui/ProductCard";
-import Toast from "../components/ui/Toast";
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { specialNeedsProducts, accessibilityCategories } from "../data/specialNeedsProducts";
 
 const SpecialNeeds = () => {
-  const [toast, setToast] = useState(null);
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredProducts = selectedCategory === "all" 
-    ? specialNeedsProducts 
-    : specialNeedsProducts.filter(product => 
-        product.accessibilityFeatures.some(feature => 
-          accessibilityCategories.find(cat => cat.name.toLowerCase().includes(selectedCategory))
-            ?.features.some(catFeature => feature.toLowerCase().includes(catFeature.toLowerCase()))
-        )
+  const filteredProducts = selectedCategory === 'all' 
+    ? specialNeedsProducts
+    : specialNeedsProducts.filter(product =>
+        product.category.toLowerCase() === selectedCategory.toLowerCase()
       );
 
-  const handleDownload = (product) => {
-    setToast({
-      message: `Download started for ${product.title}!`,
-      type: 'success'
-    });
-  };
-
-  const handleAddToCart = (product) => {
-    setToast({
-      message: `${product.title} added to cart!`,
-      type: 'success'
-    });
-  };
-
-  const handleToastClose = () => {
-    setToast(null);
-  };
+  const searchFilteredProducts = filteredProducts.filter(product =>
+    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <>
-      <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-50">
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <section className="py-16 bg-gradient-to-r from-teal-600 to-blue-600 text-white">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="text-center">
-              <h1 className="text-4xl sm:text-5xl font-bold mb-6">
-                Special Needs & Accessibility Support
-              </h1>
-              <p className="text-xl text-teal-100 max-w-3xl mx-auto mb-8">
-                Inclusive learning tools and games designed specifically for children with diverse abilities and learning needs
-              </p>
-              
-              {/* Accessibility Promise */}
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 max-w-4xl mx-auto border border-white/20">
-                <h2 className="text-2xl font-bold mb-4">Our Accessibility Promise</h2>
-                <p className="text-teal-100">
-                  Every child deserves access to quality education and fun learning experiences. Our specially designed tools support children with visual, hearing, cognitive, and motor challenges, ensuring no child is left behind in their learning journey.
-                </p>
-              </div>
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Special Needs & Accessibility Support
+          </h1>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Discover specialized products and tools designed to support children with diverse learning needs and abilities.
+          </p>
+        </div>
+
+        {/* Search and Filter */}
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <div className="flex-1">
+              <input
+                type="text"
+                placeholder="Search products..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
             </div>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">All Categories</option>
+              {accessibilityCategories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
           </div>
-        </section>
+        </div>
 
         {/* Accessibility Categories */}
-        <section className="py-16">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                Accessibility Categories
-              </h2>
-              <p className="text-xl text-gray-600">
-                Find tools tailored to specific accessibility needs
-              </p>
-            </div>
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Accessibility Categories</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {accessibilityCategories.map((category) => (
+              <div
+                key={category.id}
+                className="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow"
+              >
+                <div className="text-4xl mb-4">{category.icon}</div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">{category.name}</h3>
+                <p className="text-gray-600 text-sm mb-4">{category.description}</p>
+                <div className="space-y-1">
+                  {category.features.map((feature, index) => (
+                    <div key={index} className="flex items-center text-sm text-gray-500">
+                      <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                      {feature}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-              {accessibilityCategories.map((category) => (
-                <div
-                  key={category.name}
-                  className={`bg-white rounded-xl p-6 shadow-sm border-2 transition-all duration-300 hover:shadow-lg cursor-pointer ${
-                    selectedCategory === category.name.toLowerCase().split(' ')[0]
-                      ? 'border-teal-500 bg-teal-50'
-                      : 'border-gray-200 hover:border-teal-300'
-                  }`}
-                  onClick={() => setSelectedCategory(
-                    selectedCategory === category.name.toLowerCase().split(' ')[0] 
-                      ? "all" 
-                      : category.name.toLowerCase().split(' ')[0]
-                  )}
-                  role="button"
-                  tabIndex={0}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      setSelectedCategory(
-                        selectedCategory === category.name.toLowerCase().split(' ')[0] 
-                          ? "all" 
-                          : category.name.toLowerCase().split(' ')[0]
-                      );
-                    }
-                  }}
-                  aria-label={`Filter by ${category.name}`}
-                >
-                  <div className="text-center">
-                    <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <span className="text-2xl" role="img" aria-label={category.name}>
-                        {category.icon}
+        {/* Products Grid */}
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            Specialized Products ({searchFilteredProducts.length})
+          </h2>
+          {searchFilteredProducts.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-lg">No products found matching your criteria.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {searchFilteredProducts.map((product) => (
+                <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="relative">
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-48 object-cover"
+                    />
+                    <div className="absolute top-2 left-2">
+                      <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
+                        {product.category}
                       </span>
                     </div>
-                    <h3 className="font-bold text-lg text-gray-900 mb-2">{category.name}</h3>
-                    <p className="text-gray-600 text-sm mb-3">{category.description}</p>
-                    <div className="text-sm text-teal-600 font-medium">
-                      {category.productCount} tools available
-                    </div>
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{product.name}</h3>
+                    <p className="text-gray-600 text-sm mb-4">{product.description}</p>
                     
-                    {/* Features */}
-                    <div className="mt-3 flex flex-wrap gap-1 justify-center">
-                      {category.features.slice(0, 2).map((feature) => (
-                        <span key={feature} className="text-xs bg-teal-100 text-teal-700 px-2 py-1 rounded-full">
-                          {feature}
-                        </span>
-                      ))}
+                    {/* Accessibility Features */}
+                    <div className="mb-4">
+                      <p className="text-xs font-semibold text-teal-700 mb-2">Accessibility Features:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {product.accessibilityFeatures.slice(0, 2).map((feature, index) => (
+                          <span
+                            key={index}
+                            className="bg-teal-100 text-teal-800 text-xs px-2 py-1 rounded"
+                          >
+                            {feature}
+                          </span>
+                        ))}
+                        {product.accessibilityFeatures.length > 2 && (
+                          <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">
+                            +{product.accessibilityFeatures.length - 2} more
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-yellow-400">★</span>
+                        <span className="text-sm text-gray-600">{product.rating}</span>
+                        <span className="text-sm text-gray-400">({product.reviews})</span>
+                      </div>
+                      <span className="text-lg font-bold text-gray-900">${product.price}</span>
+                    </div>
+
+                    <div className="mt-4 flex space-x-2">
+                      <button className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                        Add to Cart
+                      </button>
+                      <Link
+                        to={`/products/${product.id}`}
+                        className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-center"
+                      >
+                        View Details
+                      </Link>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
+          )}
+        </div>
 
-            {/* Filter Reset */}
-            {selectedCategory !== "all" && (
-              <div className="text-center mb-8">
-                <button
-                  onClick={() => setSelectedCategory("all")}
-                  className="text-teal-600 hover:text-teal-700 font-medium underline"
-                >
-                  Show All Products
-                </button>
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* Products Grid */}
-        <section className="pb-20">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                Accessible Learning Tools
-              </h2>
-              <p className="text-xl text-gray-600">
-                {filteredProducts.length} products designed with accessibility in mind
-              </p>
-            </div>
-
-            {filteredProducts.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {filteredProducts.map((product, index) => (
-                  <div 
-                    key={product.id} 
-                    className="animate-fade-in"
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
-                    <div className="relative">
-                      <ProductCard 
-                        product={product} 
-                        onDownload={handleDownload} 
-                        onAddToCart={handleAddToCart}
-                      />
-                      
-                      {/* Accessibility Features Overlay */}
-                      <div className="mt-4 bg-teal-50 rounded-lg p-3 border border-teal-200">
-                        <p className="text-xs font-semibold text-teal-700 mb-2">
-                          Accessibility Features:
-                        </p>
-                        <div className="flex flex-wrap gap-1">
-                          {product.accessibilityFeatures.slice(0, 3).map((feature) => (
-                            <span 
-                              key={feature} 
-                              className="text-xs bg-teal-100 text-teal-700 px-2 py-1 rounded-full"
-                            >
-                              {feature}
-                            </span>
-                          ))}
-                          {product.accessibilityFeatures.length > 3 && (
-                            <span className="text-xs bg-teal-100 text-teal-700 px-2 py-1 rounded-full">
-                              +{product.accessibilityFeatures.length - 3} more
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-16">
-                <div className="text-6xl mb-4" role="img" aria-label="No results">🔍</div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">No products found</h3>
-                <p className="text-gray-600 mb-6">
-                  Try selecting a different accessibility category or view all products.
-                </p>
-                <button
-                  onClick={() => setSelectedCategory("all")}
-                  className="bg-teal-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-teal-700 transition-colors"
-                >
-                  Show All Products
-                </button>
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* Support Section */}
-        <section className="py-16 bg-white">
-          <div className="max-w-4xl mx-auto px-6 text-center">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">
-              Need Additional Support?
-            </h2>
-            <p className="text-xl text-gray-600 mb-8">
-              Our accessibility team is here to help you find the perfect tools for your child's unique needs.
-            </p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-teal-50 rounded-xl p-6 border border-teal-200">
-                <h3 className="font-bold text-lg text-gray-900 mb-3">
-                  Accessibility Consultation
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  Get personalized recommendations from our accessibility experts.
-                </p>
-                <Link
-                  to="/accessibility-consultation"
-                  className="bg-teal-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-teal-700 transition-colors inline-block"
-                >
-                  Schedule Consultation
-                </Link>
-              </div>
-              
-              <div className="bg-blue-50 rounded-xl p-6 border border-blue-200">
-                <h3 className="font-bold text-lg text-gray-900 mb-3">
-                  Special Needs Tutors
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  Connect with certified tutors who specialize in special needs education.
-                </p>
-                <Link
-                  to="/tutors?specialty=special-needs"
-                  className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors inline-block"
-                >
-                  Find Specialist Tutors
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* Call to Action */}
+        <div className="mt-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-8 text-center text-white">
+          <h3 className="text-2xl font-bold mb-4">Need Personalized Support?</h3>
+          <p className="text-lg mb-6">
+            Our certified special needs tutors are here to help your child thrive.
+          </p>
+          <Link
+            to="/categories"
+            className="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-block"
+          >
+            Find a Special Needs Tutor
+          </Link>
+        </div>
       </div>
-      
-      {/* Toast Notification */}
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={handleToastClose}
-        />
-      )}
-    </>
+    </div>
   );
 };
 
-export default SpecialNeeds;
+export default SpecialNeeds; 

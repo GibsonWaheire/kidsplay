@@ -12,6 +12,7 @@ const Sidebar = () => {
     { name: 'Home', path: '/', icon: '🏠' },
     { name: 'Products', path: '/products', icon: '🎮' },
     { name: 'Categories', path: '/categories', icon: '📂' },
+    { name: 'Special Needs', path: '/special-needs', icon: '🤝' },
     { name: 'Cart', path: '/cart', icon: '🛒', badge: totalItems },
   ];
 
