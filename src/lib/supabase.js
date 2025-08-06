@@ -8,6 +8,11 @@ if (import.meta.env.PROD && (!supabaseUrl || !supabaseAnonKey || supabaseUrl ===
   throw new Error('Missing Supabase environment variables. Please check your .env file.')
 }
 
+// Development mode warning
+if (import.meta.env.DEV && (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY)) {
+  console.warn('⚠️ Supabase environment variables not found. Using sample data fallbacks.')
+}
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Helper functions for common operations
