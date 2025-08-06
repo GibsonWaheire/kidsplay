@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 import { useCart } from '../hooks/useCart';
-import { useAuth } from '../context/AuthContext';
 import PageContainer from '../components/layout/PageContainer';
 import LazyImage from '../components/ui/LazyImage';
 

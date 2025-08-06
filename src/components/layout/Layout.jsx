@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import Footer from './Footer';
