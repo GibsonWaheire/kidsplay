@@ -4,15 +4,15 @@ import LazyImage from "../ui/LazyImage";
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-purple-50 py-20 lg:py-32">
+    <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-purple-50 py-20 lg:py-32 w-full">
       {/* Enhanced Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-200/20 to-purple-200/20 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-purple-200/20 to-pink-200/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <div className="relative w-full px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
+        <div className="grid lg:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
           {/* Enhanced Content */}
           <div className="text-center lg:text-left space-y-8">
             {/* Enhanced Badge */}
